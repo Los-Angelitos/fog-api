@@ -7,8 +7,8 @@ Technologies used:
 ## Installation
 1. Clone the repository:
    ```bash
-    git clone https://github.com/Los-Angelitos/edge-api.git
-    cd edge-api
+    git clone https://github.com/Los-Angelitos/fog-api.git
+    cd fog-api
    ```
 2. Create a virtual environment:
    ```bash
