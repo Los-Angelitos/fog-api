@@ -1,9 +1,13 @@
 from flask import Blueprint, request, jsonify
 
 from operations_and_monitoring.application.services import MonitoringService
+from operations_and_monitoring.application.services import BookingService
 
 monitoring_api = Blueprint('monitoring_api', __name__)
+operations_api = Blueprint('operations_api', __name__)
+
 monitoring_service = MonitoringService()
+operations_service = BookingService()
 
 @monitoring_api.route('/monitoring/devices', methods=['GET'])
 def get_devices():
@@ -34,5 +38,16 @@ def add_smoke_sensor():
         data = request.json
         smoke_sensor = monitoring_service.add_smoke_sensor(data)
         return jsonify(smoke_sensor.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@operations_api.route('/operations/bookings/<string:customer_id>', methods=['GET'])
+def get_booking_by_customer_id(customer_id):
+    try:
+        booking = operations_service.get_booking_by_customer_id(customer_id)
+        if booking:
+            return jsonify(booking.to_dict()), 200
+        else:
+            return jsonify({"error": "Booking not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
