@@ -27,3 +27,12 @@ def add_thermostat():
         return jsonify(thermostat.to_dict()), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@monitoring_api.route('/monitoring/devices/smoke_sensors', methods=['POST'])
+def add_smoke_sensor():
+    try:
+        data = request.json
+        smoke_sensor = monitoring_service.add_smoke_sensor(data)
+        return jsonify(smoke_sensor.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

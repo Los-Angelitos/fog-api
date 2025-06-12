@@ -49,3 +49,24 @@ class MonitoringRepository:
         db.session.commit()
         
         return Thermostat(device_id=thermostat.device_id, ip_address=thermostat.ip_address, mac_address=thermostat.mac_address, state=thermostat.state, temperature=thermostat.temperature, last_update=thermostat.last_update)
+    
+    def add_smoke_sensor(self, data: dict) -> SmokeSensor:
+        """
+        Adds a new smoke sensor to the system.
+        
+        :param data: The data for the new smoke sensor.
+        :return: The added SmokeSensor entity.
+        """
+        
+        smoke_sensor = SmokeSensorModel(
+            device_id=data['device_id'],
+            ip_address=data['ip_address'],
+            mac_address=data['mac_address'],
+            last_analogic_value=data.get('last_analogic_value', 0.0),  # Default value
+            last_alert_time=data.get('last_alert_time', None)
+        )
+        
+        db.session.add(smoke_sensor)
+        db.session.commit()
+        
+        return SmokeSensor(device_id=smoke_sensor.device_id, ip_address=smoke_sensor.ip_address, mac_address=smoke_sensor.mac_address, state=smoke_sensor.state, last_analogic_value=smoke_sensor.last_analogic_value, last_alert_time=smoke_sensor.last_alert_time)

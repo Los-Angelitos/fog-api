@@ -34,3 +34,16 @@ class MonitoringService:
             raise ValueError("Invalid data for thermostat. 'device_id', 'ip_address', and 'mac_address' are required.")
         
         return self.monitoring_repository.add_thermostat(data)
+    
+    def add_smoke_sensor(self, data):
+        """
+        Adds a new smoke sensor to the system.
+        
+        :param data: The data for the new smoke sensor.
+        :return: The added smoke sensor entity.
+        """
+
+        if not data or 'device_id' not in data or 'ip_address' not in data or 'mac_address' not in data:
+            raise ValueError("Invalid data for smoke sensor. 'device_id', 'ip_address', and 'mac_address' are required.")
+        
+        return self.monitoring_repository.add_smoke_sensor(data)
