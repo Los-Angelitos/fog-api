@@ -51,3 +51,12 @@ def get_booking_by_customer_id(customer_id):
             return jsonify({"error": "Booking not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@operations_api.route('/operations/bookings', methods=['POST'])
+def create_booking():
+    try:
+        data = request.json
+        booking = operations_service.add_booking(data)
+        return jsonify(booking.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
