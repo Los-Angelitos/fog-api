@@ -18,4 +18,12 @@ def get_devices():
         return jsonify(devices), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
+@monitoring_api.route('/monitoring/devices/thermostats', methods=['POST'])
+def add_thermostat():
+    try:
+        data = request.json
+        thermostat = monitoring_service.add_thermostat(data)
+        return jsonify(thermostat.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

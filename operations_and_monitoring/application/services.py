@@ -21,3 +21,16 @@ class MonitoringService:
         """
         
         return self.monitoring_repository.get_smoke_sensors()
+    
+    def add_thermostat(self, data):
+        """
+        Adds a new thermostat to the system.
+        
+        :param data: The data for the new thermostat.
+        :return: The added thermostat entity.
+        """
+
+        if not data or 'device_id' not in data or 'ip_address' not in data or 'mac_address' not in data:
+            raise ValueError("Invalid data for thermostat. 'device_id', 'ip_address', and 'mac_address' are required.")
+        
+        return self.monitoring_repository.add_thermostat(data)
