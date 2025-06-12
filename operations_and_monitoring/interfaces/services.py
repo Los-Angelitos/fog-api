@@ -1,0 +1,21 @@
+from flask import Blueprint, request, jsonify
+
+from operations_and_monitoring.application.services import MonitoringService
+
+monitoring_api = Blueprint('monitoring_api', __name__)
+monitoring_service = MonitoringService()
+
+@monitoring_api.route('/monitoring/devices', methods=['GET'])
+def get_devices():
+    try:
+        thermostats = monitoring_service.get_thermostats()
+        smoke_sensors = monitoring_service.get_smoke_sensors()
+
+        devices = {
+            "thermostats": [thermostat.to_dict() for thermostat in thermostats],
+            "smoke_sensors": [smoke_sensor.to_dict() for smoke_sensor in smoke_sensors]
+        }
+        return jsonify(devices), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+

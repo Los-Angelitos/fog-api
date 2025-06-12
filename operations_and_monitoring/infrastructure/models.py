@@ -1,5 +1,5 @@
 ﻿from shared.infrastructure.database import db
-from iam.domain.entities import Device
+from iam.infrastructure.models import Device
 from sqlalchemy import Table, Column, String, Float, DateTime
 
 class Thermostat(Device):
