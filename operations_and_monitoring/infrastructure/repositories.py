@@ -105,29 +105,76 @@ class BookingRepository:
         
         return [Booking(id=booking.id, payment_customer_id=booking.payment_customer_id, room_id=booking.room_id, description=booking.description, start_date=booking.start_date, final_date=booking.final_date, price_room=booking.price_room, night_count=booking.night_count, amount=booking.amount, state=booking.state, preference_id=booking.preference_id) for booking in result]
     
-    def add_booking(self, data: dict) -> Booking:
+    def check_in(self, booking_id: str) -> bool:
         """
-        Adds a new booking to the system.
+        Checks in a customer for a booking.
         
-        :param data: The data for the new booking.
-        :return: The added Booking entity.
+        :param booking_id: The ID of the booking to check in.
+        :return: True if the check-in was successful, False otherwise.
+
+        When a booking is checked in, the fog layer will save the record in the local database.
+        """
+
+        # Update the booking state in the external service
+        try:
+            BookingExternalService.update_booking_state(booking_id, 'checked_in')
+        except Exception as e:
+            print(f"Error updating booking state for {booking_id}: {e}")
+           
+        try:
+            booking = BookingExternalService.get_booking_by_id(booking_id)
+            if not booking:
+                return False
+            booking = BookingModel(
+                id=booking.id,
+                payment_customer_id=booking.payment_customer_id,
+                room_id=booking.room_id,
+                description=booking.description,
+                start_date=booking.start_date,
+                final_date=booking.final_date,
+                price_room=booking.price_room,
+                night_count=booking.night_count,
+                amount=booking.amount,
+                state='checked_in',  # Update state to checked_in
+                preference_id=booking.preference_id
+            )
+
+            db.session.add(booking)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error checking in booking {booking_id}: {e}")
+            return False
+        
+    def check_out(self, booking_id: str) -> bool:
+        """
+        Checks out a customer for a booking.
+        
+        :param booking_id: The ID of the booking to check out.
+        :return: True if the check-out was successful, False otherwise.
         """
         
-        booking = BookingModel(
-            id=data['id'],
-            payment_customer_id=data['payment_customer_id'],
-            room_id=data['room_id'],
-            description=data.get('description', ''),
-            start_date=data['start_date'],
-            final_date=data['final_date'],
-            price_room=data['price_room'],
-            night_count=data['night_count'],
-            amount=data['amount'],
-            state=data['state'],
-            preference_id=data.get('preference_id', None)
-        )
+        # Update the booking state in the external service
+        try:
+            BookingExternalService.update_booking_state(booking_id, 'checked_out')
+        except Exception as e:
+            print(f"Error updating booking state for {booking_id}: {e}")
         
-        db.session.add(booking)
-        db.session.commit()
+        try:
+            # removing from the local database
+            
+            query = select(BookingModel).where(BookingModel.id == booking_id)
+            booking = db.session.execute(query).scalar_one_or_none()
+            if not booking:
+                return False
+            
+            db.session.delete(booking)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error checking out booking {booking_id}: {e}")
+            return False
         
-        return Booking(id=booking.id, payment_customer_id=booking.payment_customer_id, room_id=booking.room_id, description=booking.description, start_date=booking.start_date, final_date=booking.final_date, price_room=booking.price_room, night_count=booking.night_count, amount=booking.amount, state=booking.state, preference_id=booking.preference_id)
+        
