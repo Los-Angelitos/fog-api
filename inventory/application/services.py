@@ -15,6 +15,25 @@ class SupplyService:
         
         return self.supply_repository.get_supplies(hotel_id)
     
+    def get_all_supplies(self):
+        """
+        Retrieves all supplies in the system.
+        
+        :return: A list of all supplies.
+        """
+        
+        return self.supply_repository.get_all_supplies()
+    
+    def get_supply_by_id(self, supply_id):
+        """
+        Retrieves a specific supply by its ID.
+        
+        :param supply_id: The ID of the supply to retrieve.
+        :return: The supply entity or None if not found.
+        """
+        
+        return self.supply_repository.get_supply_by_id(supply_id)
+    
     def add_supply(self, data):
         """
         Adds a new supply to the system.
@@ -40,6 +59,16 @@ class SupplyRequestService:
         """
         
         return self.supply_request_repository.get_supply_requests()
+    
+    def get_supply_request_by_id(self, request_id):
+        """
+        Retrieves a specific supply request by its ID.
+        
+        :param request_id: The ID of the supply request to retrieve.
+        :return: The supply request entity or None if not found.
+        """
+        
+        return self.supply_request_repository.get_supply_request_by_id(request_id)
     
     def add_supply_request(self, data):
         """
