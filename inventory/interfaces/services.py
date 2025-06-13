@@ -1,74 +1,35 @@
 from flask import Blueprint, request, jsonify
 
-from inventory.application.services import InventoryApplicationService
-##from iam.interfaces.services import authenticate_request
+from inventory.application.services import SupplyService
+from inventory.application.services import SupplyRequestService
 
-inventory_api = Blueprint('inventory_api', __name__)
+supply_api = Blueprint('supply_api', __name__)
+supply_request_api = Blueprint('supply_request_api', __name__)
 
-inventory_service = InventoryApplicationService()
+supply_service = SupplyService()
+supply_request_service = SupplyRequestService()
 
-
-@inventory_api.route('/api/v1/supply/create-supply', methods=['POST'])
+@supply_api.route('/api/v1/supply/create-supply', methods=['POST'])
 def create_supply():
-    ##auth_result = authenticate_request()
-   ## if auth_result:
-      ##  return auth_result
-    
-    data = request.json
     try:
-        provider_id = data['provider_id']
-        name = data['name']
-        price = data['price']
-        stock = data['stock']
-        state = data['state']
-        
-        supply = inventory_service.create_supply(
-            provider_id, name, price, stock, state,
-            request.headers.get('X-API-Key')
-        )
-        
-        return jsonify({
-            "id": supply.id,
-            "provider_id": supply.provider_id,
-            "name": supply.name,
-            "price": float(supply.price),
-            "stock": supply.stock,
-            "state": supply.state
-        }), 201
-        
-    except KeyError:
-        return jsonify({"error": "Missing required fields"}), 400
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        data = request.json
+        supply = supply_service.add_supply(data)
+        return jsonify(supply.to_dict()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+@supply_api.route('/api/v1/supply/test', methods=['GET'])
+def test_supply():
+    return jsonify({"message": "Supply API is working!", "endpoints": [
+        "POST /api/v1/supply/create-supply - Create a new supply",
+        "POST /api/v1/supply/create-supply-request - Create a new supply request"
+    ]}), 200
 
-@inventory_api.route('/api/v1/supply-request', methods=['POST'])
+@supply_request_api.route('/api/v1/supply/create-supply-request', methods=['POST'])
 def create_supply_request():
-    ##auth_result = authenticate_request()
-   ## if auth_result:
-    ##    return auth_result
-    
-    data = request.json
     try:
-        payment_owner_id = data['payment_owner_id']
-        supply_id = data['supply_id']
-        count = data['count']
-        amount = data['amount']
-        
-        supply_request = inventory_service.create_supply_request(
-            payment_owner_id, supply_id, count, amount,
-            request.headers.get('X-API-Key')
-        )
-        
-        return jsonify({
-            "id": supply_request.id,
-            "payment_owner_id": supply_request.payment_owner_id,
-            "supply_id": supply_request.supply_id,
-            "count": supply_request.count,
-            "amount": float(supply_request.amount)
-        }), 201
-        
-    except KeyError:
-        return jsonify({"error": "Missing required fields"}), 400
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        data = request.json
+        supply_request = supply_request_service.add_supply_request(data)
+        return jsonify(supply_request.to_dict()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
