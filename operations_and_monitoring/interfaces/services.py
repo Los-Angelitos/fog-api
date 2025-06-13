@@ -9,6 +9,9 @@ operations_api = Blueprint('operations_api', __name__)
 monitoring_service = MonitoringService()
 operations_service = BookingService()
 
+"""
+Endpoint to retrieve all devices (thermostats and smoke sensors) associated with a hotel.
+"""
 @monitoring_api.route('/monitoring/devices', methods=['GET'])
 def get_devices():
     try:
@@ -23,6 +26,9 @@ def get_devices():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+"""
+Endpoint to retrieve all thermostats associated with a hotel.
+"""
 @monitoring_api.route('/monitoring/devices/thermostats', methods=['POST'])
 def add_thermostat():
     try:
@@ -32,6 +38,9 @@ def add_thermostat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+"""
+Endpoint to retrieve all smoke sensors associated with a hotel.
+"""
 @monitoring_api.route('/monitoring/devices/smoke_sensors', methods=['POST'])
 def add_smoke_sensor():
     try:
@@ -41,7 +50,10 @@ def add_smoke_sensor():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@operations_api.route('/operations/bookings/<string:customer_id>', methods=['GET'])
+"""
+Endpoint to retrieve a booking by customer ID.
+"""
+@operations_api.route('/operations/booking/<string:customer_id>', methods=['GET'])
 def get_booking_by_customer_id(customer_id):
     try:
         booking = operations_service.get_booking_by_customer_id(customer_id)
@@ -51,12 +63,42 @@ def get_booking_by_customer_id(customer_id):
             return jsonify({"error": "Booking not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-@operations_api.route('/operations/bookings', methods=['POST'])
-def create_booking():
+
+"""
+Endpont to retrieve all bookings for a hotel.
+"""
+@operations_api.route('/operations/bookings/<string:hotel_id>', methods=['GET'])
+def get_bookings(hotel_id):
     try:
-        data = request.json
-        booking = operations_service.add_booking(data)
-        return jsonify(booking.to_dict()), 201
+        bookings = operations_service.get_bookings(hotel_id)
+        return jsonify([booking.to_dict() for booking in bookings]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+"""
+Endpoint to check-in a customer for a booking.
+"""
+@operations_api.route('/operations/booking/check-in/<string:booking_id>', methods=['POST'])
+def check_in_booking(booking_id):
+    try:
+        result = operations_service.check_in_booking(booking_id)
+        if result:
+            return jsonify({"message": "Check-in successful"}), 200
+        else:
+            return jsonify({"error": "Check-in failed"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+"""
+Endpoint to check-out a customer for a booking.
+"""
+@operations_api.route('/operations/booking/check-out/<string:booking_id>', methods=['POST'])
+def check_out_booking(booking_id):
+    try:
+        result = operations_service.check_out_booking(booking_id)
+        if result:
+            return jsonify({"message": "Check-out successful"}), 200
+        else:
+            return jsonify({"error": "Check-out failed"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 
