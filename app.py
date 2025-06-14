@@ -1,12 +1,16 @@
 from flask import Flask
 from flasgger import Swagger
 from iam.infrastructure.routes import iam as iam_routes
+from inventory.interfaces.services import supply_api, supply_request_api
 
 from shared.infrastructure.database import db
 
 app = Flask(__name__)
-# register the routes as blueprints, which allows for modular organization of the application
+
+# Register the routes as blueprints, which allows for modular organization of the application
 app.register_blueprint(iam_routes, url_prefix='/api/v1', name='iam')
+app.register_blueprint(supply_api, name='SupplyAPI')
+app.register_blueprint(supply_request_api, name='SupplyRequestAPI')
 
 swagger = Swagger(app, template={
     "swagger": "2.0",
@@ -21,5 +25,18 @@ swagger = Swagger(app, template={
     }}
 )
 
+@app.route("/routes")
+def list_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'rule': str(rule)
+        })
+    return {"routes": routes}
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
