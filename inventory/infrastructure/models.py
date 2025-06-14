@@ -8,10 +8,10 @@ class Supply:
         Column('id', Integer, primary_key=True),
         Column('provider_id', Integer, nullable=False),
         Column('hotel_id', Integer, nullable=False),
-        Column('name', String, nullable=False),
+        Column('name', String(200), nullable=False),
         Column('price', Float, nullable=False),
         Column('stock', Integer, nullable=False),
-        Column('state', String, nullable=False)
+        Column('state', String(50), nullable=False)
     )
 
 class SupplyRequest:

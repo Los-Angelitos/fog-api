@@ -5,6 +5,6 @@ class Device:
     __table__ = Table(
         'devices',
         db.meta,
-        Column('device_id', String(50), primary_key=True),
+        Column('device_id', String(150), primary_key=True),
         Column('api_key', String(500), nullable=False)
     )

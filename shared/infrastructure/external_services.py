@@ -5,7 +5,7 @@ load_dotenv()
 
 class ExternalService:
     def __init__(self):
-        self.base_url = os.getenv("EXTERNAL_SERVICE_URL", "http://localhost:5116/api/v1")
+        self.base_url = os.getenv("EXTERNAL_SERVICE_URL", "https://sweet-manager-api.runasp.net/api/v1")
 
     def get(self, endpoint: str, params: dict = None):
         """

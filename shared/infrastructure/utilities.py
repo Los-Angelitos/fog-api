@@ -2,7 +2,6 @@ import random
 import secrets
 import uuid
 
-
 class Utilities:
 
     def __init__(self):
