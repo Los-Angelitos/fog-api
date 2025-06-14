@@ -1,9 +1,13 @@
 ﻿class Device:
-    def __init__(self, device_id: str, ip_address: str, mac_address: str):
+    def __init__(self, device_id: str, api_key:str):
         self.device_id = device_id
-        self.ip_address = ip_address
-        self.mac_address = mac_address
-        self.state = "active"
+        self.api_key = api_key
+
+    def to_dict(self):
+        return {
+            "device_id": self.device_id,
+            "api_key": self.api_key
+        }
 
     def __repr__(self):
-        return f"Device(device_id={self.device_id}, ip_address={self.ip_address}, mac_address={self.mac_address})"
+        return f"Device(device_id={self.device_id})"
