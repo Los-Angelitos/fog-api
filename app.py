@@ -1,12 +1,14 @@
 from flask import Flask
 from flasgger import Swagger
 from iam.infrastructure.routes import iam as iam_routes
+from commerce.interfaces.services import commerce as commerce_routes
 
 from shared.infrastructure.database import db
 
 app = Flask(__name__)
 # register the routes as blueprints, which allows for modular organization of the application
 app.register_blueprint(iam_routes, url_prefix='/api/v1', name='iam')
+app.register_blueprint(commerce_routes, url_prefix='/api/v1', name='commerce')
 
 swagger = Swagger(app, template={
     "swagger": "2.0",

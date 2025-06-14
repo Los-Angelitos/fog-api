@@ -1,49 +1,28 @@
+from flasgger import swag_from
 from flask import Blueprint, request, jsonify
 from commerce.application.services import CommerceApplicationService
 
-commerce_api = Blueprint('commerce_api', __name__)
+commerce = Blueprint('commerce', __name__)
 commerce_service = CommerceApplicationService()
 
-@commerce_api.route('/api/v1/payment-owners', methods=['POST'])
-def create_payment_owner():
+@commerce.route('/api/v1/payment-customers', methods=['POST'])
+@swag_from({
+    'tags': ['Payment Customers']
+})
+def create_payment_customer():
     data = request.json
     try:
         guest_id = data['guest_id']
         final_amount = data['final_amount']
 
-        payment_owner = commerce_service.create_payment_owner(
+        payment_customer = commerce_service.create_payment_customer(
             guest_id, final_amount,
             request.headers.get('X-API-Key')
         )
 
         return jsonify({
-            "id": payment_owner.id,
-            "guest_id": payment_owner.guest_id,
-            "final_amount": float(payment_owner.final_amount)
-        }), 201
-
-    except KeyError:
-        return jsonify({"error": "Missing required fields"}), 400
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
-
-@commerce_api.route('/api/v1/payment-customers', methods=['POST'])
-def create_payment_customer():
-    data = request.json
-    try:
-        owner_id = data['owner_id']
-        description = data['description']
-        final_amount = data['final_amount']
-
-        payment_customer = commerce_service.create_payment_customer(
-            owner_id, description, final_amount,
-            request.headers.get('X-API-Key')
-        )
-
-        return jsonify({
             "id": payment_customer.id,
-            "owner_id": payment_customer.owner_id,
-            "description": payment_customer.description,
+            "guest_id": payment_customer.guest_id,
             "final_amount": float(payment_customer.final_amount)
         }), 201
 
@@ -52,7 +31,38 @@ def create_payment_customer():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@commerce_api.route('/api/v1/subscriptions', methods=['POST'])
+@commerce.route('/api/v1/payment-owners', methods=['POST'])
+@swag_from({
+    'tags': ['Payment Owners']
+})
+def create_payment_owner():
+    data = request.json
+    try:
+        owner_id = data['owner_id']
+        description = data['description']
+        final_amount = data['final_amount']
+
+        payment_owner = commerce_service.create_payment_owner(
+            owner_id, description, final_amount,
+            request.headers.get('X-API-Key')
+        )
+
+        return jsonify({
+            "id": payment_owner.id,
+            "owner_id": payment_owner.owner_id,
+            "description": payment_owner.description,
+            "final_amount": float(payment_owner.final_amount)
+        }), 201
+
+    except KeyError:
+        return jsonify({"error": "Missing required fields"}), 400
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@commerce.route('/api/v1/subscriptions', methods=['POST'])
+@swag_from({
+    'tags': ['Subscriptions']
+})
 def create_subscription():
     data = request.json
     try:
@@ -79,7 +89,10 @@ def create_subscription():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@commerce_api.route('/api/v1/contract-owners', methods=['POST'])
+@commerce.route('/api/v1/contract-owners', methods=['POST'])
+@swag_from({
+    'tags': ['Contract Owners']
+})
 def create_contract_owner():
     data = request.json
     try:
