@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, MetaData
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
 from dotenv import load_dotenv
@@ -38,9 +39,12 @@ class Database:
             pool_size=10,
             max_overflow=15
         )
+
+        self.Base = declarative_base()
+        self.Base.metadata.bind = self._engine
         
         self._session_factory = sessionmaker(bind=self._engine)
-        self._meta = MetaData()
+        self._meta = self.Base.metadata
         
         print("Database initialized with engine:", self._engine)
 
