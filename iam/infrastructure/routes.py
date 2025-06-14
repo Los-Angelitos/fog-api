@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flasgger import swag_from
-from iam.interfaces.services import authenticate_request, get_or_create_device_request
+from iam.interfaces.services import create_device_request
 
 iam = Blueprint('iam', __name__)
 
@@ -40,4 +40,4 @@ def auth():
         401:
             description: Unauthorized
     """
-   return get_or_create_device_request()
+   return create_device_request()
