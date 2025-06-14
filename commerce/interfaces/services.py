@@ -5,7 +5,8 @@ from commerce.application.services import CommerceApplicationService
 commerce = Blueprint('commerce', __name__)
 commerce_service = CommerceApplicationService()
 
-@commerce.route('/api/v1/payment-customers', methods=['POST'])
+# Payment Customer Endpoints
+@commerce.route('/api/v1/payment-customer', methods=['POST'])
 @swag_from({
     'tags': ['Payment Customers']
 })
@@ -31,7 +32,78 @@ def create_payment_customer():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@commerce.route('/api/v1/payment-owners', methods=['POST'])
+@commerce.route('/api/v1/payment-customer', methods=['GET'])
+@swag_from({
+    'tags': ['Payment Customers']
+})
+def get_all_payment_customers():
+    try:
+        payment_customers = commerce_service.get_all_payment_customers()
+        return jsonify([{
+            "id": pc.id,
+            "guest_id": pc.guest_id,
+            "final_amount": float(pc.final_amount)
+        } for pc in payment_customers]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@commerce.route('/api/v1/payment-customer/<string:payment_customer_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Payment Customers']
+})
+def get_payment_customer_by_id(payment_customer_id):
+    try:
+        payment_customer = commerce_service.get_payment_customer_by_id(payment_customer_id)
+        return jsonify({
+            "id": payment_customer.id,
+            "guest_id": payment_customer.guest_id,
+            "final_amount": float(payment_customer.final_amount)
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@commerce.route('/api/v1/payment-customer/<string:payment_customer_id>', methods=['PUT'])
+@swag_from({
+    'tags': ['Payment Customers']
+})
+def update_payment_customer(payment_customer_id):
+    data = request.json
+    try:
+        final_amount = data['final_amount']
+
+        payment_customer = commerce_service.update_payment_customer(
+            payment_customer_id, final_amount,
+            request.headers.get('X-API-Key')
+        )
+
+        return jsonify({
+            "id": payment_customer.id,
+            "guest_id": payment_customer.guest_id,
+            "final_amount": float(payment_customer.final_amount)
+        }), 200
+
+    except KeyError:
+        return jsonify({"error": "Missing required fields"}), 400
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@commerce.route('/api/v1/payment-customer/by-customer/<string:customer_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Payment Customers']
+})
+def get_payment_customer_by_customer_id(customer_id):
+    try:
+        payment_customer = commerce_service.get_payment_customer_by_customer_id(customer_id)
+        return jsonify({
+            "id": payment_customer.id,
+            "guest_id": payment_customer.guest_id,
+            "final_amount": float(payment_customer.final_amount)
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+# Payment Owner Endpoints
+@commerce.route('/api/v1/payment-owner', methods=['POST'])
 @swag_from({
     'tags': ['Payment Owners']
 })
@@ -59,7 +131,8 @@ def create_payment_owner():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@commerce.route('/api/v1/subscriptions', methods=['POST'])
+# Subscription Endpoints
+@commerce.route('/api/v1/subscription', methods=['POST'])
 @swag_from({
     'tags': ['Subscriptions']
 })
@@ -89,7 +162,8 @@ def create_subscription():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@commerce.route('/api/v1/contract-owners', methods=['POST'])
+# Contract Owner Endpoints
+@commerce.route('/api/v1/contract-owner', methods=['POST'])
 @swag_from({
     'tags': ['Contract Owners']
 })
