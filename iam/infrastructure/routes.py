@@ -9,16 +9,13 @@ iam = Blueprint('iam', __name__)
 })
 def auth():
     """
-    Authenticate the user.
+    Authenticate the device.
     ---
     responses:
       200:
-        description: User authenticated successfully
+        description: Device authenticated successfully
       401:
         description: Unauthorized
     """
     # Here you would implement your authentication logic
-    return jsonify({"message": "User authenticated successfully"}), 200
-
-
-
+    return jsonify({"message": "Device authenticated successfully"}), 200
