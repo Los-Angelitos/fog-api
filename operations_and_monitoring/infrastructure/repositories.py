@@ -25,7 +25,7 @@ class MonitoringRepository:
             result = session.query(ThermostatModel).all()
             print(f"Found {len(result)} thermostats.")
 
-            return [Thermostat(device_id=device.device_id, ip_address=device.ip_address, mac_address=device.mac_address, state=device.state, temperature=device.temperature, last_update=device.last_update) for device in result]
+            return [Thermostat(id=device.id, ip_address=device.ip_address, mac_address=device.mac_address, state=device.state, temperature=device.temperature, last_update=device.last_update) for device in result]
         except Exception as e:
             print(f"Error retrieving thermostats: {e}")
             return []
@@ -42,7 +42,7 @@ class MonitoringRepository:
             result = session.query(SmokeSensorModel).all()
             print(f"Found {len(result)} smoke sensors.")
         
-            return [SmokeSensor(device_id=device.device_id, ip_address=device.ip_address, mac_address=device.mac_address, state=device.state, last_analogic_value=device.last_analogic_value, last_alert_time=device.last_alert_time) for device in result]
+            return [SmokeSensor(id=device.id, ip_address=device.ip_address, mac_address=device.mac_address, state=device.state, last_analogic_value=device.last_analogic_value, last_alert_time=device.last_alert_time) for device in result]
         except Exception as e:
             print(f"Error retrieving smoke sensors: {e}")
             return []

@@ -33,8 +33,8 @@ def get_devices():
         smoke_sensors = monitoring_service.get_smoke_sensors()
 
         devices = {
-            "thermostats": [thermostat.to_dict() for thermostat in thermostats],
-            "smoke_sensors": [smoke_sensor.to_dict() for smoke_sensor in smoke_sensors]
+            "thermostats": [thermostat.to_json() for thermostat in thermostats],
+            "smoke_sensors": [smoke_sensor.to_json() for smoke_sensor in smoke_sensors]
         }
 
         return jsonify(devices), 200
