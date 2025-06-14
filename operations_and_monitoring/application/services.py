@@ -73,15 +73,22 @@ class BookingService:
         
         return self.booking_repository.get_bookings(hotel_id)
     
-    def add_booking(self, data):
+    def check_in(self, booking_id):
         """
-        Adds a new booking to the system.
+        Checks in a booking by ID.
         
-        :param data: The data for the new booking.
-        :return: The added booking entity.
+        :param booking_id: The ID of the booking to check in.
+        :return: The updated booking entity after check-in.
         """
-
-        if not data or 'payment_customer_id' not in data or 'room_id' not in data or 'description' not in data or 'start_date' not in data or 'final_date' not in data or 'price_room' not in data or 'night_count' not in data or 'amount' not in data:
-            raise ValueError("Invalid data for booking. Required fields are: 'payment_customer_id', 'room_id', 'description', 'start_date', 'final_date', 'price_room', 'night_count', and 'amount'.")
         
-        return self.booking_repository.add_booking(data)
+        return self.booking_repository.check_in(booking_id)
+    
+    def check_out(self, booking_id):
+        """
+        Checks out a booking by ID.
+        
+        :param booking_id: The ID of the booking to check out.
+        :return: The updated booking entity after check-out.
+        """
+        
+        return self.booking_repository.check_out(booking_id)
