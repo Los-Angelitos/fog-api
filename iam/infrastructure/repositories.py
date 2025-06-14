@@ -32,25 +32,19 @@ class DeviceRepository:
             session.close()
         
     @staticmethod
-    def get_or_create_device(device_id: str) -> Tuple[Optional[Device], bool]:
+    def create_device(data: dict) -> Optional[Device]:
         session = db.session
-        try:
-            stmt = select(DeviceModel.__table__).where(
-                DeviceModel.__table__.c.device_id == device_id
+        try: 
+            generated_api_key = Utilities.generate_api_key()
+            session.execute(
+                DeviceModel.__table__.insert().values(
+                    device_id=data['device_id'],
+                    api_key=generated_api_key
+                )
             )
-
-            result = session.execute(stmt).fetchone()
-            if result:
-                return result
-            
-            device = DeviceModel(
-                device_id= Utilities.generate_device_id(),
-                api_key= Utilities.generate_api_key(),
-            )
-
-            db.session.add(device)
-            db.session.commit()
-
-            return Device(device_id=device.device_id, api_key=device.api_key)
-        except:
-            return None
+            session.commit()
+            return Device(device_id=data['device_id'],api_key=generated_api_key)
+        except Exception as e:
+            session.rollback()
+            print(f"Unexpected error: {str(e)}")  # Debug log
+            raise e
