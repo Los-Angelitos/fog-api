@@ -1,46 +1,41 @@
 ﻿from shared.infrastructure.database import db
-from iam.infrastructure.models import Device
-from sqlalchemy import Table, Column, String, Float, DateTime
+from sqlalchemy import Table, Column, String, Float, DateTime, Integer
 
-class Thermostat(Device):
-    __table__ = Table(
-        'thermostats',
-        db.meta,
-        Column('temperature', Float, nullable=False),
-        Column('last_update', DateTime, nullable=False),
-    )
+class Thermostat(db.Base):
+    __tablename__ = 'thermostats'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ip_address = Column(String(100), nullable=False)
+    mac_address = Column(String(50), nullable=False)
+    state = Column(String(50), nullable=False)
+    temperature = Column(Float, nullable=False)
+    last_update = Column(DateTime, nullable=False)
 
-class SmokeSensor(Device):
-    __table__ = Table(
-        'smoke_sensors',
-        db.meta,
-        Column('last_analogic_value', Float, nullable=False),
-        Column('last_alert_time', DateTime, nullable=True),
-    )
+class SmokeSensor(db.Base):
+    __tablename__ = 'smoke_sensors'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ip_address = Column(String(100), nullable=False)
+    mac_address = Column(String(50), nullable=False)
+    state = Column(String(50), nullable=False)
+    last_analogic_value = Column(Float, nullable=False)
+    last_alert_time = Column(DateTime, nullable=True)
 
-class Booking:
-    __table__ = Table(
-        'bookings',
-        db.meta,
-        Column('id', String(50), primary_key=True),
-        Column('payment_customer_id', String(50), nullable=False),
-        Column('room_id', String(50), nullable=False),
-        Column('description', String(50), nullable=True),
-        Column('start_date', DateTime, nullable=False),
-        Column('final_date', DateTime, nullable=False),
-        Column('price_room', Float, nullable=False),
-        Column('night_count', Float, nullable=False),
-        Column('amount', Float, nullable=False),
-        Column('state', String(50), nullable=False),
-        Column('preference_id', String(50), nullable=True)
-    )
+class Booking(db.Base):
+    __tablename__ = 'bookings'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    payment_customer_id = Column(Integer, nullable=False)
+    room_id = Column(Integer, nullable=False)
+    description = Column(String(255), nullable=True)
+    start_date = Column(DateTime, nullable=False)
+    final_date = Column(DateTime, nullable=False)
+    price_room = Column(Float, nullable=False)
+    night_count = Column(Integer, nullable=False)
+    amount = Column(Float, nullable=False)
+    state = Column(String(50), nullable=False)
+    preference_id = Column(Integer, nullable=True)
 
-class Room:
-    __table__ = Table(
-        'rooms',
-        db.meta,
-        Column('id', String(50), primary_key=True),
-        Column('type_room_id', String(50), nullable=False),
-        Column('hotel_id', String(50), nullable=False),
-        Column('state', String(50), nullable=False)
-    )
+class Room(db.Base):
+    __tablename__ = 'rooms'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type_room_id = Column(Integer, nullable=False)
+    hotel_id = Column(Integer, nullable=False)
+    state = Column(String(50), nullable=False)

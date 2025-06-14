@@ -45,11 +45,40 @@ def get_devices():
 Endpoint to retrieve all thermostats associated with a hotel.
 """
 @monitoring_api.route('/monitoring/devices/thermostats', methods=['POST'])
+@swag_from({
+    'tags': ['Monitoring'],
+})
 def add_thermostat():
+    """
+    Adds a new thermostat to the system.
+    ---
+    parameters:
+      - in: body
+        name: thermostat
+        description: Thermostat data
+        required: true
+        schema:
+          type: object
+          properties:
+            ip_address:
+              type: string
+            mac_address:
+              type: string
+            temperature:
+              type: number
+              default: 20.0
+    responses:
+      201:
+        description: Thermostat added successfully
+      500:
+        description: Internal server error
+    """
     try:
         data = request.json
         thermostat = monitoring_service.add_thermostat(data)
-        return jsonify(thermostat.to_dict()), 201
+        if not thermostat:
+            raise Exception("Failed to add thermostat. Please check the input data.")
+        return jsonify(thermostat.to_json()), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
