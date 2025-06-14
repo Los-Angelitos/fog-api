@@ -88,3 +88,36 @@ class BookingExternalService:
         except Exception as e:
             print(f"Error updating booking state for {booking_id}: {e}")
             return False
+        
+    @staticmethod
+    def get_bookings(hotel_id: str) -> list:
+        """
+        Retrieves bookings associated with a specific hotel.
+        
+        :param hotel_id: The ID of the hotel to retrieve bookings for.
+        :return: A list of bookings associated with the hotel.
+        """
+
+        try:
+            # consume the external service to get bookings data
+
+            service = ExternalService()
+            response = service.get(f"bookings/get-all-bookings?hotel_id={hotel_id}")
+
+            bookings_data = response.json()
+            return [Booking(
+                id=booking['id'],
+                payment_customer_id=booking['payment_customer_id'],
+                room_id=booking['room_id'],
+                description=booking['description'],
+                start_date=booking['start_date'],
+                final_date=booking['final_date'],
+                price_room=booking['price_room'],
+                night_count=booking['night_count'],
+                amount=booking['amount'],
+                state=booking['state'],
+                preference_id=booking.get('preference_id', None)
+            ) for booking in bookings_data]
+        except Exception as e:
+            print(f"Error retrieving bookings for hotel {hotel_id}: {e}")
+            return []

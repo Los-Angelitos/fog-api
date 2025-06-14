@@ -49,9 +49,32 @@ class Booking:
         self.state = state
         self.preference_id = preference_id
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "payment_customer_id": self.payment_customer_id,
+            "room_id": self.room_id,
+            "description": self.description,
+            "start_date": self.start_date,
+            "final_date": self.final_date,
+            "price_room": self.price_room,
+            "night_count": self.night_count,
+            "amount": self.amount,
+            "state": self.state,
+            "preference_id": self.preference_id
+        }
+
 class Room:
     def __init__(self, id: int, type_room_id: int, hotel_id: int, state: str):
         self.id = id
         self.type_room_id = type_room_id
         self.hotel_id = hotel_id
         self.state = state
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type_room_id": self.type_room_id,
+            "hotel_id": self.hotel_id,
+            "state": self.state
+        }

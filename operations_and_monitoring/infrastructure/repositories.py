@@ -109,11 +109,15 @@ class BookingRepository:
         :param customer_id: The ID of the customer to retrieve the booking for.
         :return: The booking associated with the customer ID, or None if not found.
         """
-        
-        service = BookingExternalService()
-        booking = service.get_booking_by_customer_id(customer_id)
-        
-        return booking
+
+        try:
+            service = BookingExternalService()
+            booking = service.get_booking_by_customer_id(customer_id)
+            
+            return booking
+        except Exception as e:
+            print(f"Error retrieving booking by customer ID {customer_id}: {e}")
+            return None
 
 
     def get_bookings(self, hotel_id: str) -> list:
@@ -123,10 +127,12 @@ class BookingRepository:
         :param hotel_id: The ID of the hotel to retrieve bookings for.
         :return: A list of bookings associated with the hotel.
         """
-        
-        result = db.session.execute(select(BookingModel).where(BookingModel.hotel_id == hotel_id)).scalars().all()
-        
-        return [Booking(id=booking.id, payment_customer_id=booking.payment_customer_id, room_id=booking.room_id, description=booking.description, start_date=booking.start_date, final_date=booking.final_date, price_room=booking.price_room, night_count=booking.night_count, amount=booking.amount, state=booking.state, preference_id=booking.preference_id) for booking in result]
+        try:
+            bookings = BookingExternalService.get_bookings(hotel_id)
+            return bookings
+        except Exception as e:
+            print(f"Error retrieving bookings for hotel {hotel_id}: {e}")
+            return []
     
     def check_in(self, booking_id: str) -> bool:
         """

@@ -125,7 +125,26 @@ def add_smoke_sensor():
 Endpoint to retrieve a booking by customer ID.
 """
 @operations_api.route('/operations/booking/<string:customer_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Operations'],
+})
 def get_booking_by_customer_id(customer_id):
+    """
+    Retrieves a booking by customer ID.
+    ---
+    parameters:
+      - in: path
+        name: customer_id
+        type: string
+        required: true
+    responses:
+      200:
+        description: Booking retrieved successfully
+      404:
+        description: Booking not found
+      500:
+        description: Internal server error
+    """
     try:
         booking = operations_service.get_booking_by_customer_id(customer_id)
         if booking:
@@ -138,8 +157,26 @@ def get_booking_by_customer_id(customer_id):
 """
 Endpont to retrieve all bookings for a hotel.
 """
+@swag_from({
+    'tags': ['Operations'],
+})
 @operations_api.route('/operations/bookings/<string:hotel_id>', methods=['GET'])
 def get_bookings(hotel_id):
+    """
+    Retrieves all bookings for a specific hotel.
+    ---
+    parameters:
+      - in: path
+        name: hotel_id
+        type: string
+        required: true
+    responses:
+      200:
+        description: Bookings retrieved successfully
+      500:
+        description: Internal server error
+    """
+    
     try:
         bookings = operations_service.get_bookings(hotel_id)
         return jsonify([booking.to_dict() for booking in bookings]), 200
