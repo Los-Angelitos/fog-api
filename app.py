@@ -6,6 +6,9 @@ from operations_and_monitoring.interfaces.services import operations_api as oper
 
 from shared.infrastructure.database import db
 
+# creating the tables in the database
+db.create_all()
+
 app = Flask(__name__)
 # register the routes as blueprints, which allows for modular organization of the application
 app.register_blueprint(iam_routes, url_prefix='/api/v1', name='iam')

@@ -41,8 +41,7 @@ class Database:
         
         self._session_factory = sessionmaker(bind=self._engine)
         self._meta = MetaData()
-        self._meta.create_all(bind=self._engine)
-
+        
         print("Database initialized with engine:", self._engine)
 
     @property
@@ -53,5 +52,9 @@ class Database:
     def meta(self):
         return self._meta
     
+    def create_all(self):
+        """Create all tables in the database."""
+        self._meta.create_all(self._engine)
+        print("All tables created in the database.")
+    
 db = Database()
-

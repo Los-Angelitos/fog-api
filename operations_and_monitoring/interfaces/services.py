@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flasgger import swag_from
 
 from operations_and_monitoring.application.services import MonitoringService
 from operations_and_monitoring.application.services import BookingService
 
-monitoring_api = Blueprint('monitoring_api', __name__)
-operations_api = Blueprint('operations_api', __name__)
+monitoring_api = Blueprint('monitoring', __name__)
+operations_api = Blueprint('operations', __name__)
 
 monitoring_service = MonitoringService()
 operations_service = BookingService()
@@ -13,6 +14,9 @@ operations_service = BookingService()
 Endpoint to retrieve all devices (thermostats and smoke sensors) associated with a hotel.
 """
 @monitoring_api.route('/monitoring/devices', methods=['GET'])
+@swag_from({
+    'tags': ['Monitoring']
+})
 def get_devices():
     try:
         thermostats = monitoring_service.get_thermostats()
