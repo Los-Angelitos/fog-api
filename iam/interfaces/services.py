@@ -1,7 +1,7 @@
+from dataclasses import asdict
 from flask import Blueprint, request, jsonify
 
 from iam.application.services import AuthApplicationService
-
 iam_api = Blueprint('iam', __name__)
 
 auth_service = AuthApplicationService()
@@ -15,7 +15,7 @@ def authenticate_request():
         return jsonify({"error": "Invalid device_id or API key"}), 401
     return None
 
-def get_or_create_device_request():
+def create_device_request():
     """
     Register or authenticate a device with device_id and api_key.
     """
@@ -24,9 +24,10 @@ def get_or_create_device_request():
     if not body or 'device_id' not in body:
         return jsonify({"error": "Invalid device id."}), 400
 
-    response = auth_service.get_or_create_device(body)
+    response = auth_service.create_device(body)
 
     if response:
-        return jsonify(response), 201
+        device_dict = response.to_dict()
+        return jsonify(device_dict), 201
     else:
-        return jsonify({"error": "Something went wrong"}), 500
+        return jsonify(), 400
