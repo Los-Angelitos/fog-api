@@ -176,7 +176,7 @@ def get_bookings(hotel_id):
       500:
         description: Internal server error
     """
-    
+
     try:
         bookings = operations_service.get_bookings(hotel_id)
         return jsonify([booking.to_dict() for booking in bookings]), 200
@@ -187,9 +187,28 @@ def get_bookings(hotel_id):
 Endpoint to check-in a customer for a booking.
 """
 @operations_api.route('/operations/booking/check-in/<string:booking_id>', methods=['POST'])
+@swag_from({
+    'tags': ['Operations'],
+})
 def check_in_booking(booking_id):
+    """
+    Checks in a customer for a booking.
+    ---
+    parameters:
+      - in: path
+        name: booking_id
+        type: string
+        required: true
+    responses:
+        200:
+            description: Check-in successful
+        400:
+            description: Check-in failed
+        500:
+            description: Internal server error
+    """
     try:
-        result = operations_service.check_in_booking(booking_id)
+        result = operations_service.check_in(booking_id)
         if result:
             return jsonify({"message": "Check-in successful"}), 200
         else:

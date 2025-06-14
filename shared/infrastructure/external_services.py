@@ -18,3 +18,15 @@ class ExternalService:
         url = f"{self.base_url}/{endpoint}"
         response = requests.get(url, params=params)
         response.raise_for_status()
+
+    def put(self, endpoint: str, data: dict):
+        """
+        Makes a PUT request to the external service.
+
+        :param endpoint: The endpoint to call.
+        :param data: The data to send in the request.
+        :return: The response from the external service.
+        """
+        url = f"{self.base_url}/{endpoint}"
+        response = requests.put(url, json=data)
+        response.raise_for_status()

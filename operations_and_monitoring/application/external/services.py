@@ -82,7 +82,7 @@ class BookingExternalService:
             # consume the external service to update booking state
 
             service = ExternalService()
-            response = service.post(f"bookings/update-booking-state", json={"id": booking_id, "state": state})
+            response = service.put(f"bookings/update-booking-state", data={"id": booking_id, "state": state})
 
             return response.status_code == 200
         except Exception as e:
