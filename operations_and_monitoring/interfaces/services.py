@@ -219,10 +219,30 @@ def check_in_booking(booking_id):
 """
 Endpoint to check-out a customer for a booking.
 """
+@swag_from({
+    'tags': ['Operations'],
+})  
 @operations_api.route('/operations/booking/check-out/<string:booking_id>', methods=['POST'])
 def check_out_booking(booking_id):
+    """
+    Checks out a customer for a booking.
+    ---
+    parameters:
+      - in: path
+        name: booking_id
+        type: string
+        required: true
+    responses:
+        200:
+            description: Check-out successful
+        400:
+            description: Check-out failed
+        500:
+            description: Internal server error
+    """
+    
     try:
-        result = operations_service.check_out_booking(booking_id)
+        result = operations_service.check_out(booking_id)
         if result:
             return jsonify({"message": "Check-out successful"}), 200
         else:
