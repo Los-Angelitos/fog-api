@@ -22,25 +22,25 @@ class Booking:
     __table__ = Table(
         'bookings',
         db.meta,
-        Column('id', String, primary_key=True),
-        Column('payment_customer_id', String, nullable=False),
-        Column('room_id', String, nullable=False),
-        Column('description', String, nullable=True),
+        Column('id', String(50), primary_key=True),
+        Column('payment_customer_id', String(50), nullable=False),
+        Column('room_id', String(50), nullable=False),
+        Column('description', String(50), nullable=True),
         Column('start_date', DateTime, nullable=False),
         Column('final_date', DateTime, nullable=False),
         Column('price_room', Float, nullable=False),
         Column('night_count', Float, nullable=False),
         Column('amount', Float, nullable=False),
-        Column('state', String, nullable=False),
-        Column('preference_id', String, nullable=True)
+        Column('state', String(50), nullable=False),
+        Column('preference_id', String(50), nullable=True)
     )
 
 class Room:
     __table__ = Table(
         'rooms',
         db.meta,
-        Column('id', String, primary_key=True),
-        Column('type_room_id', String, nullable=False),
-        Column('hotel_id', String, nullable=False),
-        Column('state', String, nullable=False)
+        Column('id', String(50), primary_key=True),
+        Column('type_room_id', String(50), nullable=False),
+        Column('hotel_id', String(50), nullable=False),
+        Column('state', String(50), nullable=False)
     )

@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flasgger import swag_from
 
 from operations_and_monitoring.application.services import MonitoringService
 from operations_and_monitoring.application.services import BookingService
 
-monitoring_api = Blueprint('monitoring_api', __name__)
-operations_api = Blueprint('operations_api', __name__)
+monitoring_api = Blueprint('monitoring', __name__)
+operations_api = Blueprint('operations', __name__)
 
 monitoring_service = MonitoringService()
 operations_service = BookingService()
@@ -13,7 +14,20 @@ operations_service = BookingService()
 Endpoint to retrieve all devices (thermostats and smoke sensors) associated with a hotel.
 """
 @monitoring_api.route('/monitoring/devices', methods=['GET'])
+@swag_from({
+    'tags': ['Monitoring']
+})
 def get_devices():
+    """
+    Retrieves all devices (thermostats and smoke sensors) associated with a hotel.
+    ---
+    responses:
+      200:
+        description: Devices retrieved successfully
+      500:
+        description: Internal server error
+    """
+
     try:
         thermostats = monitoring_service.get_thermostats()
         smoke_sensors = monitoring_service.get_smoke_sensors()
@@ -22,6 +36,7 @@ def get_devices():
             "thermostats": [thermostat.to_dict() for thermostat in thermostats],
             "smoke_sensors": [smoke_sensor.to_dict() for smoke_sensor in smoke_sensors]
         }
+
         return jsonify(devices), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
