@@ -1,21 +1,43 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint
 from flasgger import swag_from
+from iam.interfaces.services import authenticate_request, get_or_create_device_request
 
 iam = Blueprint('iam', __name__)
 
-@iam.route('/sign-in', methods=['GET'])
+@iam.route('/sign-up', methods=['POST'])
 @swag_from({
-    'tags': ['Authentication']
+    'tags': ['Authentication'],
+    'parameters': [
+        {
+            'in': 'body',
+            'name': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'device_id': {
+                        'type': 'string',
+                        'example': 'abc123'
+                    }
+                },
+                'required': ['device_id']
+            }
+        }
+    ],
+    'responses': {
+        201: {'description': 'Successful operation'},
+        400: {'description': 'Invalid input'},
+        401: {'description': 'Unauthorized'}
+    }
 })
 def auth():
-    """
-    Authenticate the device.
+   """
+    Authenticate the device by its ID.
     ---
     responses:
-      200:
-        description: Device authenticated successfully
-      401:
-        description: Unauthorized
+        200:
+            description: Successful operation
+        401:
+            description: Unauthorized
     """
-    # Here you would implement your authentication logic
-    return jsonify({"message": "Device authenticated successfully"}), 200
+   return get_or_create_device_request()
