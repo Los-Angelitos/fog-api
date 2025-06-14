@@ -237,7 +237,103 @@ def create_subscription():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+@commerce.route('/api/v1/subscription', methods=['GET'])
+@swag_from({
+    'tags': ['Subscriptions']
+})
+def get_all_subscriptions():
+    try:
+        subscriptions = commerce_service.get_all_subscriptions()
+        return jsonify([{
+            "id": sub.id,
+            "name": sub.name,
+            "content": sub.content,
+            "price": float(sub.price),
+            "status": sub.status
+        } for sub in subscriptions]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+@commerce.route('/api/v1/subscription/<string:subscription_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Subscriptions']
+})
+def get_subscription_by_id(subscription_id):
+    try:
+        subscription = commerce_service.get_subscription_by_id(subscription_id)
+        return jsonify({
+            "id": subscription.id,
+            "name": subscription.name,
+            "content": subscription.content,
+            "price": float(subscription.price),
+            "status": subscription.status
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@commerce.route('/api/v1/subscription/<string:subscription_id>', methods=['PUT'])
+@swag_from({
+    'tags': ['Subscriptions']
+})
+def update_subscription(subscription_id):
+    data = request.json
+    try:
+        name = data['name']
+        content = data['content']
+        price = data['price']
+        status = data['status']
+
+        subscription = commerce_service.update_subscription(
+            subscription_id, name, content, price, status,
+            request.headers.get('X-API-Key')
+        )
+
+        return jsonify({
+            "id": subscription.id,
+            "name": subscription.name,
+            "content": subscription.content,
+            "price": float(subscription.price),
+            "status": subscription.status
+        }), 200
+
+    except KeyError:
+        return jsonify({"error": "Missing required fields"}), 400
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@commerce.route('/api/v1/subscription/by-name/<string:name>', methods=['GET'])
+@swag_from({
+    'tags': ['Subscriptions']
+})
+def get_subscription_by_name(name):
+    try:
+        subscription = commerce_service.get_subscription_by_name(name)
+        return jsonify({
+            "id": subscription.id,
+            "name": subscription.name,
+            "content": subscription.content,
+            "price": float(subscription.price),
+            "status": subscription.status
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@commerce.route('/api/v1/subscription/by-status/<string:status>', methods=['GET'])
+@swag_from({
+    'tags': ['Subscriptions']
+})
+def get_subscription_by_status(status):
+    try:
+        subscriptions = commerce_service.get_subscription_by_status(status)
+        return jsonify([{
+            "id": sub.id,
+            "name": sub.name,
+            "content": sub.content,
+            "price": float(sub.price),
+            "status": sub.status
+        } for sub in subscriptions]), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
 
 # Contract Owner Endpoints
 @commerce.route('/api/v1/contract-owner', methods=['POST'])
