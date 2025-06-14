@@ -80,18 +80,26 @@ class MonitoringRepository:
         :param data: The data for the new smoke sensor.
         :return: The added SmokeSensor entity.
         """
-        
-        smoke_sensor = SmokeSensorModel(
-            ip_address=data['ip_address'],
-            mac_address=data['mac_address'],
-            last_analogic_value=data.get('last_analogic_value', 0.0),  # Default value
-            last_alert_time=data.get('last_alert_time', None)
-        )
-        
-        db.session.add(smoke_sensor)
-        db.session.commit()
-        
-        return SmokeSensor( ip_address=smoke_sensor.ip_address, mac_address=smoke_sensor.mac_address, state=smoke_sensor.state, last_analogic_value=smoke_sensor.last_analogic_value, last_alert_time=smoke_sensor.last_alert_time)
+
+        try:     
+            smoke_sensor = SmokeSensorModel(
+                ip_address=data['ip_address'],
+                mac_address=data['mac_address'],
+                last_analogic_value=data.get('last_analogic_value', 0.0),  # Default value
+                last_alert_time=data.get('last_alert_time', datetime.datetime.now()),  # Default to now
+                state=data.get('state', 'active')  # Default state
+            )
+            
+            session = db.session
+            session.add(smoke_sensor)
+            session.commit()
+            print(f"Smoke sensor added with ID: {smoke_sensor.id}")
+            
+            return SmokeSensor(id=smoke_sensor.id, ip_address=smoke_sensor.ip_address, mac_address=smoke_sensor.mac_address, state=smoke_sensor.state, last_analogic_value=smoke_sensor.last_analogic_value, last_alert_time=smoke_sensor.last_alert_time)
+        except Exception as e:
+            print(f"Error add_smoke_sensor: {e}")
+            db.session.rollback()
+            return None
     
 class BookingRepository:
     def get_booking_by_customer_id(self, customer_id: str) -> Optional[Booking]:

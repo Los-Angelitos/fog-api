@@ -19,10 +19,21 @@ class Thermostat(Device):
         }
 
 class SmokeSensor(Device):
-    def __init__(self, id: int, ip_address: str, mac_address: str, last_analogic_value: float, last_alert_time: str = None):
+    def __init__(self, id: int, ip_address: str, mac_address: str, last_analogic_value: float, last_alert_time: str = None, state: str = None):
         super().__init__(id, ip_address, mac_address)
+        self.id = id
         self.last_analogic_value = last_analogic_value
         self.last_alert_time = last_alert_time
+        self.state = state if state else "active"
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "ip_address": self.ip_address,
+            "mac_address": self.mac_address,
+            "last_analogic_value": self.last_analogic_value,
+            "last_alert_time": self.last_alert_time
+        }
 
 class Booking:
     def __init__(self, id: int, payment_customer_id: int, room_id: int, description: str, start_date: str, final_date: str, price_room: float, night_count:int, amount: float, state: str, preference_id: int = None):

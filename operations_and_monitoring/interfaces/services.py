@@ -85,12 +85,39 @@ def add_thermostat():
 """
 Endpoint to retrieve all smoke sensors associated with a hotel.
 """
+@swag_from({
+    'tags': ['Monitoring'],
+})
 @monitoring_api.route('/monitoring/devices/smoke_sensors', methods=['POST'])
 def add_smoke_sensor():
+    """
+    Adds a new smoke sensor to the system.
+    ---
+    parameters:
+      - in: body
+        name: smoke_sensor
+        description: Smoke sensor data
+        required: true
+        schema:
+          type: object
+          properties:
+            ip_address:
+              type: string
+            mac_address:
+              type: string
+            last_analogic_value:
+              type: number
+              default: 0.0
+    responses:
+      201:
+        description: Smoke sensor added successfully
+      500:
+        description: Internal server error
+    """
     try:
         data = request.json
         smoke_sensor = monitoring_service.add_smoke_sensor(data)
-        return jsonify(smoke_sensor.to_dict()), 201
+        return jsonify(smoke_sensor.to_json()), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
