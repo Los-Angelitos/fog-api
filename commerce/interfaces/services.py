@@ -131,6 +131,81 @@ def create_payment_owner():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+@commerce.route('/api/v1/payment-owner', methods=['GET'])
+@swag_from({
+    'tags': ['Payment Owners']
+})
+def get_all_payment_owners():
+    try:
+        payment_owners = commerce_service.get_all_payment_owners()
+        return jsonify([{
+            "id": po.id,
+            "owner_id": po.owner_id,
+            "description": po.description,
+            "final_amount": float(po.final_amount)
+        } for po in payment_owners]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@commerce.route('/api/v1/payment-owner/<string:payment_owner_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Payment Owners']
+})
+def get_payment_owner_by_id(payment_owner_id):
+    try:
+        payment_owner = commerce_service.get_payment_owner_by_id(payment_owner_id)
+        return jsonify({
+            "id": payment_owner.id,
+            "owner_id": payment_owner.owner_id,
+            "description": payment_owner.description,
+            "final_amount": float(payment_owner.final_amount)
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@commerce.route('/api/v1/payment-owner/<string:payment_owner_id>', methods=['PUT'])
+@swag_from({
+    'tags': ['Payment Owners']
+})
+def update_payment_owner(payment_owner_id):
+    data = request.json
+    try:
+        description = data['description']
+        final_amount = data['final_amount']
+
+        payment_owner = commerce_service.update_payment_owner(
+            payment_owner_id, description, final_amount,
+            request.headers.get('X-API-Key')
+        )
+
+        return jsonify({
+            "id": payment_owner.id,
+            "owner_id": payment_owner.owner_id,
+            "description": payment_owner.description,
+            "final_amount": float(payment_owner.final_amount)
+        }), 200
+
+    except KeyError:
+        return jsonify({"error": "Missing required fields"}), 400
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@commerce.route('/api/v1/payment-owner/by-owner/<string:owner_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Payment Owners']
+})
+def get_payment_owner_by_owner_id(owner_id):
+    try:
+        payment_owner = commerce_service.get_payment_owner_by_owner_id(owner_id)
+        return jsonify({
+            "id": payment_owner.id,
+            "owner_id": payment_owner.owner_id,
+            "description": payment_owner.description,
+            "final_amount": float(payment_owner.final_amount)
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
 # Subscription Endpoints
 @commerce.route('/api/v1/subscription', methods=['POST'])
 @swag_from({
@@ -161,6 +236,8 @@ def create_subscription():
         return jsonify({"error": "Missing required fields"}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+
 
 # Contract Owner Endpoints
 @commerce.route('/api/v1/contract-owner', methods=['POST'])
