@@ -1,5 +1,5 @@
-from typing import Optional
-from sqlalchemy import Tuple, and_, insert, select
+from typing import Optional, Tuple
+from sqlalchemy import and_, insert, select
 from iam.infrastructure.models import Device as DeviceModel
 from iam.domain.entities import Device
 from shared.infrastructure.database import db
@@ -14,17 +14,18 @@ class DeviceRepository:
     def find_by_id_and_api_key(device_id : str, api_key : str) -> Optional[Device]:
         session = db.session
         try:
-            stmt = select(DeviceModel).where(
+            stmt = select(DeviceModel.__table__).where(
                 and_(
-                    DeviceModel.c.device_id == device_id,
-                    DeviceModel.c.api_key == api_key
+                    DeviceModel.__table__.c.device_id == device_id,
+                    DeviceModel.__table__.c.api_key == api_key
                 )
             )
             result = session.execute(stmt).fetchone()
             if result:
                 row = result._mapping
                 return Device(
-                    device_id=row["device_id"]
+                    device_id=row["device_id"],
+                    api_key=row["api_key"]
                 )
             return None
         finally:
@@ -34,14 +35,13 @@ class DeviceRepository:
     def get_or_create_device(device_id: str) -> Tuple[Optional[Device], bool]:
         session = db.session
         try:
-            
-            stmt = select(DeviceModel).where(
-                DeviceModel.c.device_id == device_id
+            stmt = select(DeviceModel.__table__).where(
+                DeviceModel.__table__.c.device_id == device_id
             )
 
             result = session.execute(stmt).fetchone()
-            if result is None:
-                return None
+            if result:
+                return result
             
             device = DeviceModel(
                 device_id= Utilities.generate_device_id(),
