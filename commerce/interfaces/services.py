@@ -367,3 +367,106 @@ def create_contract_owner():
         return jsonify({"error": "Missing required fields"}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+@commerce.route('/api/v1/contract-owner', methods=['GET'])
+@swag_from({
+    'tags': ['Contract Owners']
+})
+def get_all_contract_owners():
+    try:
+        contract_owners = commerce_service.get_all_contract_owners()
+        return jsonify([{
+            "id": co.id,
+            "owner_id": co.owner_id,
+            "start_date": co.start_date,
+            "final_date": co.final_date,
+            "subscription_id": co.subscription_id,
+            "status": co.status
+        } for co in contract_owners]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@commerce.route('/api/v1/contract-owner/<string:contract_owner_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Contract Owners']
+})
+def get_contract_owner_by_id(contract_owner_id):
+    try:
+        contract_owner = commerce_service.get_contract_owner_by_id(contract_owner_id)
+        return jsonify({
+            "id": contract_owner.id,
+            "owner_id": contract_owner.owner_id,
+            "start_date": contract_owner.start_date,
+            "final_date": contract_owner.final_date,
+            "subscription_id": contract_owner.subscription_id,
+            "status": contract_owner.status
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@commerce.route('/api/v1/contract-owner/<string:contract_owner_id>', methods=['PUT'])
+@swag_from({
+    'tags': ['Contract Owners']
+})
+def update_contract_owner(contract_owner_id):
+    data = request.json
+    try:
+        start_date = data['start_date']
+        final_date = data['final_date']
+        subscription_id = data['subscription_id']
+        status = data['status']
+
+        contract_owner = commerce_service.update_contract_owner(
+            contract_owner_id, start_date, final_date, subscription_id, status,
+            request.headers.get('X-API-Key')
+        )
+
+        return jsonify({
+            "id": contract_owner.id,
+            "owner_id": contract_owner.owner_id,
+            "start_date": contract_owner.start_date,
+            "final_date": contract_owner.final_date,
+            "subscription_id": contract_owner.subscription_id,
+            "status": contract_owner.status
+        }), 200
+
+    except KeyError:
+        return jsonify({"error": "Missing required fields"}), 400
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@commerce.route('/api/v1/contract-owner/by-owner/<string:owner_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Contract Owners']
+})
+def get_contract_owner_by_owner_id(owner_id):
+    try:
+        contract_owner = commerce_service.get_contract_owner_by_owner_id(owner_id)
+        return jsonify({
+            "id": contract_owner.id,
+            "owner_id": contract_owner.owner_id,
+            "start_date": contract_owner.start_date,
+            "final_date": contract_owner.final_date,
+            "subscription_id": contract_owner.subscription_id,
+            "status": contract_owner.status
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@commerce.route('/api/v1/contract-owner/by-subscription/<string:subscription_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Contract Owners']
+})
+def get_contract_owner_by_subscription_id(subscription_id):
+    try:
+        contract_owner = commerce_service.get_contract_owner_by_subscription_id(subscription_id)
+        return jsonify({
+            "id": contract_owner.id,
+            "owner_id": contract_owner.owner_id,
+            "start_date": contract_owner.start_date,
+            "final_date": contract_owner.final_date,
+            "subscription_id": contract_owner.subscription_id,
+            "status": contract_owner.status
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
