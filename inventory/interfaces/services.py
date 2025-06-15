@@ -2,10 +2,14 @@ from flask import Blueprint, request, jsonify
 
 from inventory.application.services import SupplyService
 from inventory.application.services import SupplyRequestService
+from inventory.application.services import RfidCodeService
+
 
 supply_api = Blueprint('supply_api', __name__)
 supply_request_api = Blueprint('supply_request_api', __name__)
+rfid_api = Blueprint('rfid_api', __name__)
 
+rfid_service = RfidCodeService()
 supply_service = SupplyService()
 supply_request_service = SupplyRequestService()
 
@@ -48,7 +52,6 @@ def create_supply():
               description: Name of the supply
             price:
               type: number
-              format: float
               description: Price of the supply
             stock:
               type: integer
@@ -77,7 +80,6 @@ def create_supply():
               description: Name of the supply
             price:
               type: number
-              format: float
               description: Price of the supply
             stock:
               type: integer
@@ -143,7 +145,6 @@ def get_all_supplies():
                 description: Name of the supply
               price:
                 type: number
-                format: float
                 description: Price of the supply
               stock:
                 type: integer
@@ -202,7 +203,6 @@ def get_supply_by_id(supply_id):
               description: Name of the supply
             price:
               type: number
-              format: float
               description: Price of the supply
             stock:
               type: integer
@@ -234,40 +234,6 @@ def get_supply_by_id(supply_id):
         return jsonify(supply.to_dict()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@supply_api.route('/api/v1/supply/test', methods=['GET'])
-def test_supply():
-    """Test endpoint to verify Supply API is working
-    ---
-    tags:
-      - Supply
-    summary: Test Supply API
-    description: Test endpoint to verify that the Supply API is working correctly
-    produces:
-      - application/json
-    responses:
-      200:
-        description: API is working correctly
-        schema:
-          type: object
-          properties:
-            message:
-              type: string
-              description: Success message
-            available_endpoints:
-              type: array
-              items:
-                type: string
-              description: List of available endpoints
-    """
-    return jsonify({
-        "message": "Supply API is working!",
-        "available_endpoints": [
-            "POST /api/v1/supply/create-supply - Create a new supply",
-            "GET /api/v1/supply/get-all-supplies - Get all supplies",
-            "GET /api/v1/supply/{id} - Get supply by ID"
-        ]
-    }), 200
 
 # Supply Request endpoints
 @supply_request_api.route('/api/v1/supply/create-supply-request', methods=['POST'])
@@ -306,7 +272,6 @@ def create_supply_request():
               description: Quantity of supplies requested
             amount:
               type: number
-              format: float
               description: Total amount for the request
     responses:
       201:
@@ -328,7 +293,6 @@ def create_supply_request():
               description: Quantity requested
             amount:
               type: number
-              format: float
               description: Total amount
       400:
         description: Invalid input data
@@ -392,7 +356,6 @@ def get_supply_request_by_id(request_id):
               description: Quantity requested
             amount:
               type: number
-              format: float
               description: Total amount
       404:
         description: Supply request not found
@@ -419,35 +382,223 @@ def get_supply_request_by_id(request_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@supply_request_api.route('/api/v1/supply/supply-request/test', methods=['GET'])
-def test_supply_request():
-    """Test endpoint to verify Supply Request API is working
+@rfid_api.route('/api/v1/rfid/validate-access', methods=['POST'])
+def validate_rfid_access():
+    """Validate RFID access to a room
     ---
     tags:
-      - Supply Request
-    summary: Test Supply Request API
-    description: Test endpoint to verify that the Supply Request API is working correctly
+      - RFID
+    summary: Validate RFID access
+    description: Validates if an RFID UID has access to a specific room
+    consumes:
+      - application/json
     produces:
       - application/json
+    parameters:
+      - in: body
+        name: rfid_validation
+        description: RFID validation request from IoT device
+        required: true
+        schema:
+          type: object
+          required:
+            - rfid_uid
+            - room_id
+          properties:
+            rfid_uid:
+              type: string
+              description: RFID UID in hexadecimal format
+            room_id:
+              type: string
+              description: Room identifier
     responses:
       200:
-        description: API is working correctly
+        description: Access validation result
         schema:
           type: object
           properties:
-            message:
+            access_granted:
+              type: boolean
+              description: Whether access is granted or not
+      400:
+        description: Invalid request data
+        schema:
+          type: object
+          properties:
+            error:
               type: string
-              description: Success message
-            available_endpoints:
-              type: array
-              items:
-                type: string
-              description: List of available endpoints
+              description: Error message
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              description: Error message
     """
-    return jsonify({
-        "message": "Supply Request API is working!",
-        "available_endpoints": [
-            "POST /api/v1/supply/supply-request - Create a new supply request",
-            "GET /api/v1/supply/supply-request/{id} - Get supply request by ID"
-        ]
-    }), 200
+    try:
+        data = request.json
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        rfid_uid = data.get('rfid_uid')
+        room_id = data.get('room_id')
+        
+        if not rfid_uid or not room_id:
+            return jsonify({"error": "Missing required fields: rfid_uid and room_id"}), 400
+        
+        # Validate access
+        access_granted = rfid_service.validate_rfid_access(rfid_uid, room_id)
+        
+        return jsonify({"access_granted": access_granted}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@rfid_api.route('/api/v1/rfid/create', methods=['POST'])
+def create_rfid_code():
+    """Create a new RFID code
+    ---
+    tags:
+      - RFID
+    summary: Create a new RFID code
+    description: Creates a new RFID code in the system
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    parameters:
+      - in: body
+        name: rfid_code
+        description: RFID code object that needs to be created
+        required: true
+        schema:
+          type: object
+          required:
+            - room_id
+            - guest_id
+            - booking_id
+            - uuid
+          properties:
+            room_id:
+              type: string
+              description: Room identifier
+            guest_id:
+              type: integer
+              description: ID of the guest
+            booking_id:
+              type: integer
+              description: ID of the booking
+            uuid:
+              type: string
+              description: RFID UUID in hexadecimal format
+    responses:
+      201:
+        description: RFID code created successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID of the created RFID code
+            room_id:
+              type: string
+              description: Room identifier
+            guest_id:
+              type: integer
+              description: ID of the guest
+            booking_id:
+              type: integer
+              description: ID of the booking
+            uuid:
+              type: string
+              description: RFID UUID
+      400:
+        description: Invalid input data
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              description: Error message
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              description: Error message
+    """
+    try:
+        data = request.json
+        rfid_code = rfid_service.add_rfid_code(data)
+        return jsonify(rfid_code.to_dict()), 201
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@rfid_api.route('/api/v1/rfid/<string:uuid>', methods=['GET'])
+def get_rfid_code_by_uuid(uuid):
+    """Get RFID code by UUID
+    ---
+    tags:
+      - RFID
+    summary: Retrieve RFID code by UUID
+    description: Returns a specific RFID code based on the provided UUID
+    produces:
+      - application/json
+    parameters:
+      - in: path
+        name: uuid
+        type: string
+        required: true
+        description: UUID of the RFID code to retrieve
+    responses:
+      200:
+        description: RFID code retrieved successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID of the RFID code
+            room_id:
+              type: string
+              description: Room identifier
+            guest_id:
+              type: integer
+              description: ID of the guest
+            booking_id:
+              type: integer
+              description: ID of the booking
+            uuid:
+              type: string
+              description: RFID UUID
+      404:
+        description: RFID code not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              description: Error message
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              description: Error message
+    """
+    try:
+        rfid_code = rfid_service.get_rfid_code_by_uuid(uuid)
+        if rfid_code is None:
+            return jsonify({"error": "RFID code not found"}), 404
+        return jsonify(rfid_code.to_dict()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
