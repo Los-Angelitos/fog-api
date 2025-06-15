@@ -31,3 +31,15 @@ def create_device_request():
         return jsonify(device_dict), 201
     else:
         return jsonify(), 400
+    
+def get_all_devices_by_room_id_request():
+    """
+    Returns all devices for an specific room.
+    """
+    room_id = request.args.get("roomId")
+
+    if not room_id:
+        return jsonify({"error": "Missing required query parameter: roomId"}), 400
+    
+    # Call the services and returns the list of devices per room
+    
