@@ -35,3 +35,21 @@ class SupplyRequest:
             "count": self.count,
             "amount": self.amount
         }
+    
+
+class RfidCode:
+    def __init__(self, id: int, room_id: str, guest_id: int, booking_id: int, uuid: str):
+        self.id = id
+        self.room_id = room_id
+        self.guest_id = guest_id
+        self.booking_id = booking_id
+        self.uuid = uuid
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "room_id": self.room_id,
+            "guest_id": self.guest_id,
+            "booking_id": self.booking_id,
+            "uuid": self.uuid
+        }
