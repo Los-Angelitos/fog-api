@@ -3,6 +3,7 @@ from flasgger import Swagger
 from iam.infrastructure.routes import iam as iam_routes
 from operations_and_monitoring.interfaces.services import monitoring_api as monitoring_routes
 from operations_and_monitoring.interfaces.services import operations_api as operations_routes
+from organizational_management.interfaces.services import organizational_management_api as organizational_management_routes
 
 from shared.infrastructure.database import db
 
@@ -14,6 +15,7 @@ app = Flask(__name__)
 app.register_blueprint(iam_routes, url_prefix='/api/v1', name='iam')
 app.register_blueprint(monitoring_routes, url_prefix='/api/v1', name='monitoring')
 app.register_blueprint(operations_routes, url_prefix='/api/v1', name='operations')
+app.register_blueprint(organizational_management_routes, url_prefix='/api/v1', name='organizational_management')
 
 swagger = Swagger(app, template={
     "swagger": "2.0",
