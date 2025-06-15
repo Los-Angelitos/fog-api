@@ -24,3 +24,14 @@ class SupplyRequest:
         Column('count', Integer, nullable=False),
         Column('amount', Float, nullable=False)
     )
+
+class RfidCode:
+    __table__ = Table(
+        'rfid_codes',
+        db.meta,
+        Column('id', Integer, primary_key=True),
+        Column('room_id', String(50), nullable=False),
+        Column('guest_id', Integer, nullable=False),
+        Column('booking_id', Integer, nullable=False),
+        Column('uuid', String(255), nullable=False, unique=True)
+    )
