@@ -1,7 +1,7 @@
 from flask import Flask
 from flasgger import Swagger
 from iam.infrastructure.routes import iam as iam_routes
-from inventory.interfaces.services import supply_api, supply_request_api
+from inventory.interfaces.services import supply_api, supply_request_api, rfid_api
 from operations_and_monitoring.interfaces.services import monitoring_api as monitoring_routes
 from operations_and_monitoring.interfaces.services import operations_api as operations_routes
 
@@ -16,6 +16,7 @@ app = Flask(__name__)
 app.register_blueprint(iam_routes, url_prefix='/api/v1', name='iam')
 app.register_blueprint(supply_api, name='SupplyAPI')
 app.register_blueprint(supply_request_api, name='SupplyRequestAPI')
+app.register_blueprint(rfid_api, name='RfidAPI')  # Nueva línea agregad
 app.register_blueprint(monitoring_routes, url_prefix='/api/v1', name='monitoring')
 app.register_blueprint(operations_routes, url_prefix='/api/v1', name='operations')
 
