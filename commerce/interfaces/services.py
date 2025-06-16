@@ -2,7 +2,7 @@ from flasgger import swag_from
 from flask import Blueprint, request, jsonify
 from commerce.application.services import CommerceApplicationService
 
-commerce = Blueprint('commerce', __name__)
+commerce = Blueprint('commerce_api', __name__)
 commerce_service = CommerceApplicationService()
 
 # Payment Customer Endpoints
