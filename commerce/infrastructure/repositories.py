@@ -35,7 +35,7 @@ class PaymentCustomerRepository:
             print(f"Error fetching payment customers: {e}")
             return []
 
-    def find_by_id(self, payment_customer_id: int) -> Optional[PaymentCustomer]:
+    def find_by_id(self, payment_customer_id: str) -> Optional[PaymentCustomer]:
         session = db.session
         try:
             record = session.query(PaymentCustomerModel).filter_by(id=payment_customer_id).one()
@@ -89,7 +89,7 @@ class PaymentOwnerRepository:
             print(f"Error fetching payment owners: {e}")
             return []
 
-    def find_by_id(self) -> Optional[PaymentOwner]:
+    def find_by_id(self, payment_owner_id: str) -> Optional[PaymentOwner]:
         session = db.session
         try:
             record = session.query(PaymentOwnerModel).filter_by(id=payment_owner_id).one()
@@ -145,7 +145,7 @@ class SubscriptionRepository:
             print(f"Error fetching subscriptions: {e}")
             return []
 
-    def find_by_id(self, subscription_id: int) -> Optional[Subscription]:
+    def find_by_id(self, subscription_id: str) -> Optional[Subscription]:
         session = db.session
         try:
             record = session.query(SubscriptionModel).filter_by(id=subscription_id).one()
@@ -211,7 +211,7 @@ class ContractOwnerRepository:
             print(f"Error fetching contract owners: {e}")
             return []
 
-    def find_by_id(self, contract_owner_id: int) -> Optional[ContractOwner]:
+    def find_by_id(self, contract_owner_id: str) -> Optional[ContractOwner]:
         session = db.session
         try:
             record = session.query(ContractOwnerModel).filter_by(id=contract_owner_id).one()
