@@ -58,6 +58,8 @@ class MonitoringRepository:
         session = db.session
         try:
             thermostat = ThermostatModel(
+                device_id=data['device_id'],
+                api_key=data['api_key'],
                 ip_address=data['ip_address'],
                 mac_address=data['mac_address'],
                 temperature=data.get('temperature', 20.0),  # Default temperature
@@ -70,7 +72,7 @@ class MonitoringRepository:
             print(f"Thermostat added with ID: {thermostat.id}")
             
             return Thermostat(
-                id=thermostat.id,ip_address=thermostat.ip_address, mac_address=thermostat.mac_address, state=thermostat.state, temperature=thermostat.temperature, last_update=thermostat.last_update)
+                id=thermostat.id, device_id=thermostat.device_id, api_key=thermostat.api_key, ip_address=thermostat.ip_address, mac_address=thermostat.mac_address, state=thermostat.state, temperature=thermostat.temperature, last_update=thermostat.last_update)
 
         except Exception as e:
             print(f"Error add_thermostat: {e}")
@@ -88,6 +90,8 @@ class MonitoringRepository:
         session = db.session
         try:     
             smoke_sensor = SmokeSensorModel(
+                device_id=data['device_id'],
+                api_key=data['api_key'],
                 ip_address=data['ip_address'],
                 mac_address=data['mac_address'],
                 last_analogic_value=data.get('last_analogic_value', 0.0),  # Default value
@@ -99,7 +103,7 @@ class MonitoringRepository:
             session.commit()
             print(f"Smoke sensor added with ID: {smoke_sensor.id}")
             
-            return SmokeSensor(id=smoke_sensor.id, ip_address=smoke_sensor.ip_address, mac_address=smoke_sensor.mac_address, state=smoke_sensor.state, last_analogic_value=smoke_sensor.last_analogic_value, last_alert_time=smoke_sensor.last_alert_time)
+            return SmokeSensor(id=smoke_sensor.id, device_id=smoke_sensor.device_id, api_key=smoke_sensor.api_key, ip_address=smoke_sensor.ip_address, mac_address=smoke_sensor.mac_address, state=smoke_sensor.state, last_analogic_value=smoke_sensor.last_analogic_value, last_alert_time=smoke_sensor.last_alert_time)
         except Exception as e:
             print(f"Error add_smoke_sensor: {e}")
             session.rollback()

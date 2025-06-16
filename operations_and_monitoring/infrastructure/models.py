@@ -4,6 +4,8 @@ from sqlalchemy import Table, Column, String, Float, DateTime, Integer
 class Thermostat(db.Base):
     __tablename__ = 'thermostats'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    device_id = Column(String(100), nullable=False, unique=True)
+    api_key = Column(String(100), nullable=False)
     ip_address = Column(String(100), nullable=False)
     mac_address = Column(String(50), nullable=False)
     state = Column(String(50), nullable=False)
@@ -13,6 +15,8 @@ class Thermostat(db.Base):
 class SmokeSensor(db.Base):
     __tablename__ = 'smoke_sensors'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    device_id = Column(String(100), nullable=False, unique=True)
+    api_key = Column(String(100), nullable=False)
     ip_address = Column(String(100), nullable=False)
     mac_address = Column(String(50), nullable=False)
     state = Column(String(50), nullable=False)

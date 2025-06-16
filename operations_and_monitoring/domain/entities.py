@@ -1,9 +1,11 @@
 ﻿from iam.domain.entities import Device
 
 class Thermostat(Device):
-    def __init__(self, id: int, ip_address: str, mac_address: str, temperature: float, last_update: str, state: str = None):
-        super().__init__(id, ip_address, mac_address)
+    def __init__(self, id: int, device_id: str, api_key: str, ip_address: str, mac_address: str, temperature: float, last_update: str, state: str = None):
+        super().__init__(device_id, api_key)
         self.id = id
+        self.ip_address = ip_address
+        self.mac_address = mac_address
         self.temperature = temperature
         self.last_update = last_update
         self.state = state if state else "active"
@@ -11,6 +13,8 @@ class Thermostat(Device):
     def to_json(self):
         return {
             "id": self.id,
+            "device_id": self.device_id,
+            "api_key": self.api_key,
             "ip_address": self.ip_address,
             "mac_address": self.mac_address,
             "temperature": self.temperature,
@@ -19,9 +23,11 @@ class Thermostat(Device):
         }
 
 class SmokeSensor(Device):
-    def __init__(self, id: int, ip_address: str, mac_address: str, last_analogic_value: float, last_alert_time: str = None, state: str = None):
-        super().__init__(id, ip_address, mac_address)
+    def __init__(self, id: int, device_id: str, api_key: str, ip_address: str, mac_address: str, last_analogic_value: float, last_alert_time: str = None, state: str = None):
+        super().__init__(device_id, api_key)
         self.id = id
+        self.ip_address = ip_address
+        self.mac_address = mac_address
         self.last_analogic_value = last_analogic_value
         self.last_alert_time = last_alert_time
         self.state = state if state else "active"
@@ -29,6 +35,8 @@ class SmokeSensor(Device):
     def to_json(self):
         return {
             "id": self.id,
+            "device_id": self.device_id,
+            "api_key": self.api_key,
             "ip_address": self.ip_address,
             "mac_address": self.mac_address,
             "last_analogic_value": self.last_analogic_value,
