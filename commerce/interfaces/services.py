@@ -61,8 +61,7 @@ def create_payment_customer():
         final_amount = data['final_amount']
 
         payment_customer = commerce_service.create_payment_customer(
-            guest_id, final_amount,
-            request.headers.get('X-API-Key')
+            guest_id, final_amount
         )
 
         return jsonify({
@@ -325,8 +324,7 @@ def create_payment_owner():
         final_amount = data['final_amount']
 
         payment_owner = commerce_service.create_payment_owner(
-            owner_id, description, final_amount,
-            request.headers.get('X-API-Key')
+            owner_id, description, final_amount
         )
 
         return jsonify({
@@ -615,8 +613,7 @@ def create_subscription():
         status = data['status']
 
         subscription = commerce_service.create_subscription(
-            name, content, price, status,
-            request.headers.get('X-API-Key')
+            name, content, price, status
         )
 
         return jsonify({
@@ -992,8 +989,7 @@ def create_contract_owner():
         status = data['status']
 
         contract_owner = commerce_service.create_contract_owner(
-            owner_id, start_date, final_date, subscription_id, status,
-            request.headers.get('X-API-Key')
+            owner_id, start_date, final_date, subscription_id, status
         )
 
         return jsonify({
@@ -1326,3 +1322,4 @@ def get_contract_owner_by_subscription_id(subscription_id):
         }), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
+

@@ -9,11 +9,10 @@ class CommerceApplicationService:
         self.contract_owner_repository = ContractOwnerRepository()
 
     # Payment Customer Methods
-    def create_payment_customer(self, data):
-        if not data or 'guest_id' not in data or 'final_amount' not in data:
+    def create_payment_customer(self, guest_id, final_amount):
+        if not guest_id or not final_amount:
             raise ValueError("Invalid data for payment customer. 'guest_id' and 'final_amount' are required.")
-
-        return self.payment_customer_repository.add_payment_customer(data)
+        return self.payment_customer_repository.add_payment_customer(guest_id, final_amount)
 
     def get_all_payment_customers(self):
         return self.payment_customer_repository.find_all()
@@ -43,11 +42,11 @@ class CommerceApplicationService:
 
 
     # Payment Owner Methods
-    def create_payment_owner(self, data):
-        if not data or 'owner_id' not in data or 'description' not in data or 'final_amount' not in data:
+    def create_payment_owner(self, owner_id, description, final_amount):
+        if not owner_id or not description or not final_amount:
             raise ValueError("Invalid data for payment owner. 'owner_id', 'description', and 'final_amount' are required.")
 
-        return self.payment_owner_repository.add_payment_owner(data)
+        return self.payment_owner_repository.add_payment_owner(owner_id, description, final_amount)
 
     def get_all_payment_owners(self):
         return self.payment_owner_repository.find_all()
@@ -78,11 +77,11 @@ class CommerceApplicationService:
 
 
     # Subscription Methods
-    def create_subscription(self, data):
-        if not data or 'name' not in data or 'content' not in data or 'price' not in data or 'status' not in data:
+    def create_subscription(self, name, content, price, status):
+        if not name or not content or not price or not status:
             raise ValueError("Invalid data for subscription. 'name', 'content', 'price', and 'status' are required.")
 
-        return self.subscription_repository.add_subscription(data)
+        return self.subscription_repository.add_subscription(name, content, price, status)
 
     def get_all_subscriptions(self):
         return self.subscription_repository.find_all()
@@ -120,16 +119,16 @@ class CommerceApplicationService:
 
 
     # Contract Owner Methods
-    def create_contract_owner(self, data):
-        if not data or 'owner_id' not in data or 'start_date' not in data or 'final_date' not in data or 'subscription_id' not in data or 'status' not in data:
+    def create_contract_owner(self, owner_id, start_date, final_date, subscription_id, status):
+        if not owner_id or not start_date or not final_date or not subscription_id or not status:
             raise ValueError("Invalid data for contract owner. 'owner_id', 'start_date', 'final_date', 'subscription_id', and 'status' are required.")
 
         # Validate subscription exists
-        subscription = self.subscription_repository.find_by_id(data['subscription_id'])
+        subscription = self.subscription_repository.find_by_id(subscription_id)
         if not subscription:
             raise ValueError("Subscription not found")
 
-        return self.contract_owner_repository.add_contract_owner(data)
+        return self.contract_owner_repository.add_contract_owner(owner_id, start_date, final_date, subscription_id, status)
 
     def get_all_contract_owners(self):
         return self.contract_owner_repository.find_all()

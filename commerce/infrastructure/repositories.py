@@ -11,12 +11,12 @@ from shared.infrastructure.database import db
 from sqlalchemy.exc import NoResultFound
 
 class PaymentCustomerRepository:
-    def add_payment_customer(self, data: dict) -> Optional[PaymentCustomer]:
+    def add_payment_customer(self, guest_id: str, final_amount: str) -> Optional[PaymentCustomer]:
         session = db.session
         try:
             payment_customer = PaymentCustomerModel(
-                guest_id=data['guest_id'],
-                final_amount=data['final_amount']
+                guest_id=guest_id,
+                final_amount=final_amount
             )
             session.add(payment_customer)
             session.commit()
@@ -64,13 +64,13 @@ class PaymentCustomerRepository:
 
 
 class PaymentOwnerRepository:
-    def add_payment_owner(self, data: dict) -> Optional[PaymentOwner]:
+    def add_payment_owner(self, owner_id: str, description: str, final_amount: str) -> Optional[PaymentOwner]:
         session = db.session
         try:
             payment_owner = PaymentOwnerModel(
-                owner_id=data['owner_id'],
-                description=data['description'],
-                final_amount=data['final_amount']
+                owner_id=owner_id,
+                description=description,
+                final_amount=final_amount
             )
             session.add(payment_owner)
             session.commit()
@@ -119,14 +119,14 @@ class PaymentOwnerRepository:
 
 
 class SubscriptionRepository:
-    def add_subscription(self, data: dict) -> Optional[Subscription]:
+    def add_subscription(self, name: str, content: str, price: float, status: str) -> Optional[Subscription]:
         session = db.session
         try:
             subscription = SubscriptionModel(
-                name=data['name'],
-                content=data['content'],
-                price=data['price'],
-                status=data['status']
+                name=name,
+                content=content,
+                price=price,
+                status=status
             )
             session.add(subscription)
             session.commit()
@@ -184,15 +184,15 @@ class SubscriptionRepository:
 
 
 class ContractOwnerRepository:
-    def add_contract_owner(self, data: dict) -> Optional[ContractOwner]:
+    def add_contract_owner(self, owner_id: str, start_date: str, final_date: str, subscription_id: str, status: str) -> Optional[ContractOwner]:
         session = db.session
         try:
             contract_owner = ContractOwnerModel(
-                owner_id=data['owner_id'],
-                start_date=data['start_date'],
-                final_date=data['final_date'],
-                subscription_id=data['subscription_id'],
-                status=data['status']
+                owner_id=owner_id,
+                start_date=start_date,
+                final_date=final_date,
+                subscription_id=subscription_id,
+                status=status
             )
             session.add(contract_owner)
             session.commit()
