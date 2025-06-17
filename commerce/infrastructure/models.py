@@ -1,44 +1,44 @@
-﻿from peewee import Model, AutoField, CharField, DecimalField, DateField
+﻿from sqlalchemy import Table, Column, String, Integer, Float
 from shared.infrastructure.database import db
 
-class PaymentCustomer(Model):
-    id = AutoField()
-    guest_id = CharField()
-    final_amount = DecimalField(max_digits=10, decimal_places=2)
+class PaymentCustomer:
+    __table__ = Table(
+        'payment_customers',
+        db.meta,
+        Column('id', Integer, primary_key=True, autoincrement=True),
+        Column('guest_id', String(50), nullable=False),
+        Column('final_amount', String(200), nullable=False),
+    )
 
-    class Meta:
-        database = db
-        table_name = 'payment_customers'
+class PaymentOwner:
+    __table__ = Table(
+        'payment_owners',
+        db.meta,
+        Column('id', Integer, primary_key=True, autoincrement=True),
+        Column('owner_id', String(50), nullable=False),
+        Column('description', String(200), nullable=False),
+        Column('final_amount', Float, nullable=False),
+    )
 
-class PaymentOwner(Model):
-    id = AutoField()
-    owner_id = CharField()
-    description = CharField()
-    final_amount = DecimalField(max_digits=10, decimal_places=2)
+class Subscription:
+    __table__ = Table(
+        'subscriptions',
+        db.meta,
+        Column('id', Integer, primary_key=True, autoincrement=True),
+        Column('name', String(200), nullable=False),
+        Column('content', String(500), nullable=False),
+        Column('price', Float, nullable=False),
+        Column('status', String(50), nullable=False)
+    )
 
-    class Meta:
-        database = db
-        table_name = 'payment_owners'
-
-class Subscription(Model):
-    id = AutoField()
-    name = CharField()
-    content = CharField()
-    price = DecimalField(max_digits=10, decimal_places=2)
-    status = CharField()
-
-    class Meta:
-        database = db
-        table_name = 'subscriptions'
-
-class ContractOwner(Model):
-    id = AutoField()
-    owner_id = CharField()
-    start_date = DateField()
-    final_date = DateField()
-    subscription_id = CharField()
-    status = CharField()
-
-    class Meta:
-        database = db
-        table_name = 'contract_owners'
+class ContractOwner:
+    __table__ = Table(
+        'contract_owners',
+        db.meta,
+        Column('id', Integer, primary_key=True, autoincrement=True),
+        Column('owner_id', String(50), nullable=False),
+        Column('start_date', String(50), nullable=False),
+        Column('final_date', String(50), nullable=False),
+        Column('subscription_id', String(50), nullable=False),
+        Column('status', String(50), nullable=False)
+    )
