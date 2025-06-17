@@ -11,6 +11,7 @@ class Thermostat(db.Base):
     state = Column(String(50), nullable=False)
     temperature = Column(Float, nullable=False)
     last_update = Column(DateTime, nullable=False)
+    room_id = Column(Integer, nullable=False)
 
 class SmokeSensor(db.Base):
     __tablename__ = 'smoke_sensors'
@@ -22,6 +23,7 @@ class SmokeSensor(db.Base):
     state = Column(String(50), nullable=False)
     last_analogic_value = Column(Float, nullable=False)
     last_alert_time = Column(DateTime, nullable=True)
+    room_id=Column(Integer, nullable=False)
 
 class Booking(db.Base):
     __tablename__ = 'bookings'

@@ -71,6 +71,9 @@ def add_thermostat():
             temperature:
               type: number
               default: 20.0
+            room_id:
+              type: integer
+              default: 1
     responses:
       201:
         description: Thermostat added successfully
@@ -116,6 +119,9 @@ def add_smoke_sensor():
             last_analogic_value:
               type: number
               default: 0.0
+            room_id:
+              type: integer
+              default: 1
     responses:
       201:
         description: Smoke sensor added successfully
