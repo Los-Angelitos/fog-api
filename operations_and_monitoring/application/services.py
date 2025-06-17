@@ -31,8 +31,8 @@ class MonitoringService:
         :return: The added thermostat entity.
         """
 
-        if not data or 'ip_address' not in data or 'mac_address' not in data:
-            raise ValueError("Invalid data for thermostat. 'device_id', 'ip_address', and 'mac_address' are required.")
+        if not data or 'device_id' not in data or 'api_key' not in data:
+            raise ValueError("Invalid data for thermostat. 'device_id', 'api_key' are required.")
         
         return self.monitoring_repository.add_thermostat(data)
     
@@ -44,8 +44,8 @@ class MonitoringService:
         :return: The added smoke sensor entity.
         """
 
-        if not data or 'ip_address' not in data or 'mac_address' not in data:
-            raise ValueError("Invalid data for smoke sensor. 'device_id', 'ip_address', and 'mac_address' are required.")
+        if not data or 'api_key' not in data or 'device_id' not in data:
+            raise ValueError("Invalid data for smoke sensor. 'device_id', 'api_key' are required.")
         
         return self.monitoring_repository.add_smoke_sensor(data)
 

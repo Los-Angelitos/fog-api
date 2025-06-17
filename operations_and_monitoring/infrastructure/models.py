@@ -4,20 +4,26 @@ from sqlalchemy import Table, Column, String, Float, DateTime, Integer
 class Thermostat(db.Base):
     __tablename__ = 'thermostats'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    device_id = Column(String(100), nullable=False, unique=True)
+    api_key = Column(String(100), nullable=False)
     ip_address = Column(String(100), nullable=False)
     mac_address = Column(String(50), nullable=False)
     state = Column(String(50), nullable=False)
     temperature = Column(Float, nullable=False)
     last_update = Column(DateTime, nullable=False)
+    room_id = Column(Integer, nullable=False)
 
 class SmokeSensor(db.Base):
     __tablename__ = 'smoke_sensors'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    device_id = Column(String(100), nullable=False, unique=True)
+    api_key = Column(String(100), nullable=False)
     ip_address = Column(String(100), nullable=False)
     mac_address = Column(String(50), nullable=False)
     state = Column(String(50), nullable=False)
     last_analogic_value = Column(Float, nullable=False)
     last_alert_time = Column(DateTime, nullable=True)
+    room_id=Column(Integer, nullable=False)
 
 class Booking(db.Base):
     __tablename__ = 'bookings'
