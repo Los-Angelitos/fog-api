@@ -1,4 +1,7 @@
-﻿class Supply:
+﻿from iam.domain.entities import Device
+
+
+class Supply:
     def __init__(self, id: int, provider_id: int, hotel_id: int, name: str, price: float, stock: int, state: str):
         self.id = id
         self.provider_id = provider_id
@@ -34,4 +37,18 @@ class SupplyRequest:
             "supply_id": self.supply_id,
             "count": self.count,
             "amount": self.amount
+        }
+
+class Rfid(Device):
+    def __init__(self, id: int, room_id: str, api_key: str, uId: str):
+        super().__init__(room_id, api_key)
+        self.id = id
+        self.uId = uId
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "room_id": self.room_id,
+            "api_key": self.api_key,
+            "uId": self.uId
         }

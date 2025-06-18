@@ -11,7 +11,7 @@ monitoring_service = MonitoringService()
 operations_service = BookingService()
 
 """
-Endpoint to retrieve all devices (thermostats and smoke sensors) associated with a hotel.
+Endpoint to retrieve all devices (thermostats, smoke sensors adn rfid readers) associated with a hotel.
 """
 @monitoring_api.route('/monitoring/devices', methods=['GET'])
 @swag_from({
@@ -19,7 +19,7 @@ Endpoint to retrieve all devices (thermostats and smoke sensors) associated with
 })
 def get_devices():
     """
-    Retrieves all devices (thermostats and smoke sensors) associated with a hotel.
+    Retrieves all devices (thermostats, smoke sensors and rfid readers) associated with a hotel.
     ---
     responses:
       200:
@@ -31,13 +31,61 @@ def get_devices():
     try:
         thermostats = monitoring_service.get_thermostats()
         smoke_sensors = monitoring_service.get_smoke_sensors()
+        rfid_devices = monitoring_service.get_rfid()
 
         devices = {
             "thermostats": [thermostat.to_json() for thermostat in thermostats],
-            "smoke_sensors": [smoke_sensor.to_json() for smoke_sensor in smoke_sensors]
+            "smoke_sensors": [smoke_sensor.to_json() for smoke_sensor in smoke_sensors],
+            "rfid_devices": [rfid.to_json() for rfid in rfid_devices]
         }
 
         return jsonify(devices), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@monitoring_api.route('/monitoring/devices/validation', methods=['POST'])
+@swag_from({
+    'tags': ['Monitoring']
+})
+def validation_service():
+    """
+    Validates if there's an existing device with the provided room_id and u_id.
+    ---
+    parameters:
+      - in: body
+        name: validation_data
+        description: Data to validate device existence
+        required: true
+        schema:
+          type: object
+          properties:
+            room_id:
+              type: integer
+              description: The ID of the room
+            u_id:
+              type: string
+              description: The unique ID of the device
+    responses:
+      200:
+        description: Validation successful
+      400:
+        description: Bad request
+      500:
+        description: Internal server error
+    """
+
+    try:
+        data = request.json
+        print(data)
+        room_id = data.get('room_id')
+        u_id = data.get('u_id')
+        if not room_id or not u_id:
+            return jsonify({"error": "room_id and u_id are required"}), 400
+        exists = monitoring_service.validation_service(data)
+        if exists:
+            return jsonify({"message": "Device exists"}), 200
+        else:
+            return jsonify({"message": "Device does not exist"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

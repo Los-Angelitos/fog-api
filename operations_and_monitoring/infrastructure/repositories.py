@@ -2,7 +2,9 @@ from sqlalchemy import select
 from shared.infrastructure.database import db
 
 from operations_and_monitoring.infrastructure.models import Thermostat as ThermostatModel, SmokeSensor as SmokeSensorModel
+from inventory.infrastructure.models import Rfid as RfidModel
 from operations_and_monitoring.domain.entities import Thermostat, SmokeSensor
+from inventory.domain.entities import Rfid
 
 from operations_and_monitoring.domain.entities import Booking
 from operations_and_monitoring.infrastructure.models import Booking as BookingModel
@@ -45,6 +47,22 @@ class MonitoringRepository:
             return [SmokeSensor(id=device.id, device_id=device.device_id, api_key=device.api_key, ip_address=device.ip_address, mac_address=device.mac_address, state=device.state, last_analogic_value=device.last_analogic_value,room_id=device.room_id, last_alert_time=device.last_alert_time) for device in result]
         except Exception as e:
             print(f"Error retrieving smoke sensors: {e}")
+            return []
+
+    def get_rfid(self) -> list[Rfid]:
+        """
+        Retrieves RFID tags associated with a specific hotel.
+
+        :return: A list of Rfid entities.
+        """
+        try:
+            session = db.session
+            result = session.query(RfidModel).all()
+            print(f"Found {len(result)} RFID tags.")
+
+            return [Rfid(id=device.id, device_id=device.device_id, api_key=device.api_key, uId=device.u_id) for device in result]
+        except Exception as e:
+            print(f"Error retrieving RFID tags: {e}")
             return []
     
     def add_thermostat(self, data: dict) -> Optional[Thermostat]:
@@ -109,7 +127,29 @@ class MonitoringRepository:
         except Exception as e:
             print(f"Error add_smoke_sensor: {e}")
             session.rollback()
-            return None  
+            return None
+
+    def validation_service(self, data: dict) -> bool:
+        """
+        Validates if there's an existing rfid device with the provided room_id and u_id.
+        :param data: The data containing room_id and u_id to validate.
+        :return: True if the device exists, False otherwise.
+        """
+        if not data or 'room_id' not in data or 'u_id' not in data:
+            raise ValueError("Invalid data for validation. 'room_id' and 'u_id' are required.")
+
+        room_id = data['room_id']
+        u_id = data['u_id']
+
+        try:
+            session = db.session
+            query = select(RfidModel).where(RfidModel.room_id == room_id, RfidModel.u_id == u_id)
+            device = session.execute(query).scalar_one_or_none()
+            return device is not None
+        except Exception as e:
+            print(f"Error validating service: {e}")
+            return False
+
     
 class BookingRepository:
     def get_booking_by_customer_id(self, customer_id: str) -> Optional[Booking]:

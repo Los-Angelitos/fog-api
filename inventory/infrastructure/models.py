@@ -24,3 +24,10 @@ class SupplyRequest:
         Column('count', Integer, nullable=False),
         Column('amount', Float, nullable=False)
     )
+
+class Rfid(db.Base):
+    __tablename__ = 'rfid_devices'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    room_id = Column(String(100), nullable=False)
+    api_key = Column(String(100), nullable=False)
+    u_id = Column(String(100), nullable=False)

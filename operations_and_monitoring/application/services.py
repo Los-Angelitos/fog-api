@@ -22,6 +22,15 @@ class MonitoringService:
         """
         
         return self.monitoring_repository.get_smoke_sensors()
+
+    def get_rfid(self):
+        """
+        Retrieves RFID devices associated with a specific hotel.
+
+        :return: A list of RFID devices associated with the hotel.
+        """
+
+        return self.monitoring_repository.get_rfid()
     
     def add_thermostat(self, data):
         """
@@ -48,6 +57,18 @@ class MonitoringService:
             raise ValueError("Invalid data for smoke sensor. 'device_id', 'api_key' are required.")
         
         return self.monitoring_repository.add_smoke_sensor(data)
+
+    def validation_service(self, data):
+        """
+        Validates if there's an existing device with the provided room_id and u_id.
+        :param data: The data containing room_id and u_id for validation.
+        :return: True if the device exists, False otherwise.
+        """
+
+        if not data or 'room_id' not in data or 'u_id' not in data:
+            raise ValueError("Invalid data for validation. 'room_id' and 'u_id' are required.")
+
+        return self.monitoring_repository.validation_service(data)
 
 class BookingService:
     def __init__(self):
