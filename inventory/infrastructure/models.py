@@ -28,6 +28,7 @@ class SupplyRequest:
 class Rfid(db.Base):
     __tablename__ = 'rfid_devices'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    room_id = Column(String(100), nullable=False)
-    api_key = Column(String(100), nullable=False)
+    device_id = Column(String(100), unique=True, nullable=True)  # <-- mejor como str
+    room_id = Column(Integer, nullable=False)        # <-- mejor como int
+    api_key = Column(String(100), nullable=True)
     u_id = Column(String(100), nullable=False)

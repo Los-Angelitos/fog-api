@@ -1,14 +1,21 @@
 from flask import Blueprint, request, jsonify
 from flasgger import swag_from
 
+from inventory.domain.entities import Rfid
 from operations_and_monitoring.application.services import MonitoringService
 from operations_and_monitoring.application.services import BookingService
+from operations_and_monitoring.domain.entities import Thermostat
+from operations_and_monitoring.infrastructure.repositories import MonitoringRepository
+from operations_and_monitoring.interfaces.acl.services import MonitoringFacade
 
 monitoring_api = Blueprint('monitoring', __name__)
 operations_api = Blueprint('operations', __name__)
 
 monitoring_service = MonitoringService()
 operations_service = BookingService()
+monitoring_facade = MonitoringFacade()
+
+
 
 """
 Endpoint to retrieve all devices (thermostats, smoke sensors adn rfid readers) associated with a hotel.
@@ -83,15 +90,70 @@ def validation_service():
             return jsonify({"error": "room_id and u_id are required"}), 400
         exists = monitoring_service.validation_service(data)
         if exists:
-            return jsonify({"message": "Device exists"}), 200
+            return jsonify({"access": True}), 200
         else:
-            return jsonify({"message": "Device does not exist"}), 404
+            return jsonify({"access": False}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
 """
 Endpoint to retrieve all thermostats associated with a hotel.
 """
+@monitoring_api.route('/monitoring/devices/thermostats', methods=['GET'])
+@swag_from({
+    'tags': ['Monitoring'],
+    'responses': {
+        200: {'description': 'Thermostats retrieved successfully'},
+        500: {'description': 'Internal server error'}
+    }
+})
+def get_thermostats():
+    """
+    Retrieves all thermostats associated with a hotel.
+    """
+    try:
+        thermostats = monitoring_service.get_thermostats()
+        return jsonify([t.to_json() for t in thermostats]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@monitoring_api.route('/monitoring/devices/smoke-sensors', methods=['GET'])
+@swag_from({
+    'tags': ['Monitoring'],
+    'responses': {
+        200: {'description': 'Smoke sensors retrieved successfully'},
+        500: {'description': 'Internal server error'}
+    }
+})
+def get_smoke_sensors():
+    """
+    Retrieves all smoke sensors associated with a hotel.
+    """
+    try:
+        smoke_sensors = monitoring_service.get_smoke_sensors()
+        return jsonify([s.to_json() for s in smoke_sensors]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@monitoring_api.route('/monitoring/devices/rfid', methods=['GET'])
+@swag_from({
+    'tags': ['Monitoring'],
+    'responses': {
+        200: {'description': 'RFID devices retrieved successfully'},
+        500: {'description': 'Internal server error'}
+    }
+})
+def get_rfid_devices():
+    """
+    Retrieves all RFID devices associated with a hotel.
+    """
+    try:
+        rfid_devices = monitoring_service.get_rfid()
+        return jsonify([r.to_json() for r in rfid_devices]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @monitoring_api.route('/monitoring/devices/thermostats', methods=['POST'])
 @swag_from({
     'tags': ['Monitoring'],
@@ -285,7 +347,7 @@ Endpoint to check-out a customer for a booking.
 """
 @swag_from({
     'tags': ['Operations'],
-})  
+})
 @operations_api.route('/operations/booking/check-out/<string:booking_id>', methods=['POST'])
 def check_out_booking(booking_id):
     """
@@ -312,4 +374,79 @@ def check_out_booking(booking_id):
         else:
             return jsonify({"error": "Check-out failed"}), 400
     except Exception as e:
-        return jsonify({"error": str(e)}), 500 
+        return jsonify({"error": str(e)}), 500
+
+@swag_from({
+    'tags': ['Monitoring'],
+})
+@monitoring_api.route('/monitoring/devices/thermostats/<int:room_id>', methods=['GET'])
+@swag_from({
+    'tags': ['Monitoring']
+})
+def get_thermostats_by_room_id(room_id):
+    """
+    Retrieves thermostats by room ID.
+    ---
+    parameters:
+      - in: path
+        name: room_id
+        type: integer
+        required: true
+        description: The ID of the room
+    responses:
+      200:
+        description: Thermostats retrieved successfully
+      400:
+        description: Missing room_id parameter
+      500:
+        description: Internal server error
+    """
+    try:
+        if not room_id:
+            return jsonify({"error": "room_id is required"}), 400
+
+        # Usa el service correctamente instanciado
+        thermostats = monitoring_facade.get_thermostats_by_room_id(room_id)
+
+        return jsonify([thermostat.to_json() for thermostat in thermostats]), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@swag_from({
+    'tags': ['Monitoring'],
+})
+@monitoring_api.route('/monitoring/devices/rfid-readers/<int:room_id>', methods=['GET'])
+def get_rfid_by_room_id(room_id):
+    """
+        Retrieves RFID readers by room ID.
+        ---
+        parameters:
+          - in: path
+            name: room_id
+            type: int
+            required: true
+            description: The ID of the room
+        responses:
+          200:
+            description: RFID readers retrieved successfully
+          400:
+            description: Missing room_id parameter
+          500:
+            description: Internal server error
+    """
+    if room_id == None or room_id == "":
+        raise Exception("room_id parameter is necessary")
+
+    print("[Route] LLAMANDO A monitoring_facade.get_rfid_by_room_id...")
+    rfid_devices = monitoring_facade.get_rfid_by_room_id(room_id)
+    print(f"[Route] Recibido {len(rfid_devices)} dispositivos.")
+
+    # TODO si es que esta vacio, le pide al backend
+    # y guarda en la base de datos
+    # Pero como lo haria si el backend requiere json token
+    # si no, devuelve los dispositivos que ya tiene
+
+    return [rfid_device.to_json() for rfid_device in rfid_devices]
+
+

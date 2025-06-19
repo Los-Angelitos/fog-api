@@ -40,15 +40,17 @@ class SupplyRequest:
         }
 
 class Rfid(Device):
-    def __init__(self, id: int, room_id: str, api_key: str, uId: str):
-        super().__init__(room_id, api_key)
+    def __init__(self, id: int, room_id: int, api_key: str, u_id: str, device_id: str):
+        super().__init__(device_id, api_key)
         self.id = id
-        self.uId = uId
+        self.room_id = room_id
+        self.u_id = u_id
 
     def to_json(self):
         return {
             "id": self.id,
             "room_id": self.room_id,
+            "device_id": self.device_id,
             "api_key": self.api_key,
-            "uId": self.uId
+            "u_id": self.u_id
         }
