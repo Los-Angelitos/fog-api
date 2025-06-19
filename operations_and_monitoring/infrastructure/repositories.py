@@ -2,7 +2,9 @@ from sqlalchemy import select
 from shared.infrastructure.database import db
 
 from operations_and_monitoring.infrastructure.models import Thermostat as ThermostatModel, SmokeSensor as SmokeSensorModel
+from inventory.infrastructure.models import Rfid as RfidModel
 from operations_and_monitoring.domain.entities import Thermostat, SmokeSensor
+from inventory.domain.entities import Rfid
 
 from operations_and_monitoring.domain.entities import Booking
 from operations_and_monitoring.infrastructure.models import Booking as BookingModel
@@ -12,7 +14,9 @@ from operations_and_monitoring.application.external.services import BookingExter
 from typing import Optional
 import datetime
 
-class MonitoringRepository:    
+class MonitoringRepository:
+
+
     def get_thermostats(self) -> list[Thermostat]:
         """
         Retrieves thermostats associated with a specific hotel.
@@ -25,11 +29,86 @@ class MonitoringRepository:
             result = session.query(ThermostatModel).all()
             print(f"Found {len(result)} thermostats.")
 
-            return [Thermostat(id=device.id, device_id=device.device_id, api_key=device.api_key,ip_address=device.ip_address, mac_address=device.mac_address, state=device.state, temperature=device.temperature, last_update=device.last_update, room_id=device.room_id) for device in result]
+            return [Thermostat(id=device.id, device_id=device.device_id,
+                               api_key=device.api_key,ip_address=device.ip_address,
+                               mac_address=device.mac_address,
+                               state=device.state, temperature=device.temperature,
+                               last_update=device.last_update,
+                               room_id=device.room_id) for device in result]
         except Exception as e:
             print(f"Error retrieving thermostats: {e}")
             return []
-    
+
+    def get_rfid(self) -> list[Rfid]:
+        """
+        Retrieves RFID devices associated with a specific hotel.
+        """
+        try:
+            session = db.session
+            print("[Repository] Getting RFID devices from DB...")
+            result = session.query(RfidModel).all()
+            print(f"[Repository] Raw result from DB: {result}")
+            print(f"[Repository] Found {len(result)} RFID devices.")
+
+            rfids = []
+            for device in result:
+                print("[Repository] Mapping device to entity:")
+                print(f"  - ID: {device.id}")
+                print(f"  - device_id: {getattr(device, 'device_id', 'MISSING')}")
+                print(f"  - room_id: {device.room_id}")
+                print(f"  - api_key: {device.api_key}")
+                print(f"  - u_id: {device.u_id}")
+
+                try:
+                    rfid_entity = Rfid(
+                        id=device.id,
+                        room_id=device.room_id,
+                        device_id=device.device_id,
+                        api_key=device.api_key,
+                        u_id=device.u_id,
+                    )
+                    rfids.append(rfid_entity)
+                except Exception as inner_e:
+                    print(f"[Repository] Error mapping RFID entity: {inner_e}")
+
+            print(f"[Repository] Total mapped RFID entities: {len(rfids)}")
+            return rfids
+
+        except Exception as e:
+            print(f"[Repository] Error retrieving RFID devices: {e}")
+            return []
+
+    def save_thermostat(self, item: dict, ):
+        session = db.session
+        try:
+            # Buscar si ya existe un termostato con ese device_id
+            existing = session.query(ThermostatModel).filter_by(device_id=item["id"]).first()
+
+            if existing:
+                print(f"[Repository] Thermostat with ID {item['id']} already exists. Skipping.")
+                return
+
+            # Crear uno nuevo si no existe
+            new_thermostat = ThermostatModel(
+                device_id=item["id"],
+                api_key=item.get("api_key", ""),
+                ip_address=item.get("ipAddress", ""),
+                mac_address=item.get("macAddress", ""),
+                state=item.get("state", "OFF"),
+                last_update=item.get("lastUpdate", datetime.datetime.now()),
+                temperature=item.get("temperature", "0"),
+                room_id=item.get("roomId"),
+            )
+
+            session.add(new_thermostat)
+            session.commit()
+            print(f"[Repository] Thermostat {item['id']} inserted successfully.")
+
+        except Exception as e:
+            session.rollback()
+            print(f"[Repository] Error inserting thermostat: {e}")
+
+
     def get_smoke_sensors(self) -> list[SmokeSensor]:
         """
         Retrieves smoke sensors associated with a specific hotel.
@@ -46,7 +125,30 @@ class MonitoringRepository:
         except Exception as e:
             print(f"Error retrieving smoke sensors: {e}")
             return []
-    
+
+    def save_rfid(self, item: dict):
+        try:
+            session = db.session
+
+            existing = session.query(RfidModel).filter_by(device_id=item["id"]).first()
+            if existing:
+                print(f"[Repository] RFID with ID {item['id']} already exists. Skipping.")
+                return
+
+            new_rfid = RfidModel(
+                device_id=item["id"],  # <- aquí usamos el campo lógico
+                room_id=item.get("roomId"),
+                api_key=item.get("apiKey", ""),
+                u_id=item.get("uId", ""),
+            )
+
+            session.add(new_rfid)
+            session.commit()
+            print(f"[Repository] RFID device {item['id']} inserted successfully.")
+
+        except Exception as e:
+            print(f"[Repository] Error inserting RFID device: {e}")
+
     def add_thermostat(self, data: dict) -> Optional[Thermostat]:
         """
         Adds a new thermostat to the system.
@@ -109,7 +211,29 @@ class MonitoringRepository:
         except Exception as e:
             print(f"Error add_smoke_sensor: {e}")
             session.rollback()
-            return None  
+            return None
+
+    def validation_service(self, data: dict) -> bool:
+        """
+        Validates if there's an existing rfid device with the provided room_id and u_id.
+        :param data: The data containing room_id and u_id to validate.
+        :return: True if the device exists, False otherwise.
+        """
+        if not data or 'room_id' not in data or 'u_id' not in data:
+            raise ValueError("Invalid data for validation. 'room_id' and 'u_id' are required.")
+
+        room_id = data['room_id']
+        u_id = data['u_id']
+
+        try:
+            session = db.session
+            query = select(RfidModel).where(RfidModel.room_id == room_id, RfidModel.u_id == u_id)
+            device = session.execute(query).scalar_one_or_none()
+            return device is not None
+        except Exception as e:
+            print(f"Error validating service: {e}")
+            return False
+
     
 class BookingRepository:
     def get_booking_by_customer_id(self, customer_id: str) -> Optional[Booking]:
