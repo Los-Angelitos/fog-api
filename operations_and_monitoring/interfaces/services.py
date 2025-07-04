@@ -7,6 +7,8 @@ from operations_and_monitoring.application.services import BookingService
 from operations_and_monitoring.domain.entities import Thermostat
 from operations_and_monitoring.infrastructure.repositories import MonitoringRepository
 from operations_and_monitoring.interfaces.acl.services import MonitoringFacade
+import requests
+from shared.infrastructure.hotelconfig import   BACKEND_URL, HOTEL_ID
 
 monitoring_api = Blueprint('monitoring', __name__)
 operations_api = Blueprint('operations', __name__)
@@ -450,3 +452,87 @@ def get_rfid_by_room_id(room_id):
     return [rfid_device.to_json() for rfid_device in rfid_devices]
 
 
+@swag_from({
+    'tags': ['Notifications'],
+})
+@operations_api.route('/notifications', methods=['POST'])
+def send_smoke_sensor_notification():
+    """
+    Sends a notification when a smoke sensor detects smoke.
+    ---
+    parameters:
+      - in: body
+        name: notification_data
+        description: Data for the notification
+        required: true
+        schema:
+          type: object
+          properties:
+            device_id:
+              type: string
+              description: The ID of the smoke sensor device
+            current_value:
+              type: string
+              description: The current analog value from the smoke sensor
+            room_id:
+              type: integer
+              description: The ID of the room where the smoke sensor is located
+    responses:
+      200:
+        description: Notification sent successfully
+      400:
+        description: Invalid request, device_id and current_value are required
+      500:
+        description: Internal server error
+    """
+
+    token = monitoring_facade._get_auth_token()
+    if not token:
+        raise Exception("Authentication with backend failed")
+
+    data = request.json
+    device_id = data.get('device_id')
+    current_value = data.get('current_value')
+    room_id = data.get('room_id')
+    if not device_id or not current_value or not room_id:
+        return jsonify({"error": "Invalid request, device_id, current_value and room_id are required"}), 400
+
+    back_url = f"{BACKEND_URL}/notifications"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    owner_id = monitoring_facade.get_owner_id_by_hotel_id(HOTEL_ID)
+    payload = {
+        "title": "SMOKE SENSOR ALERT",
+        "content": "Alerta de humo detectado por el sensor con ID: " + device_id +
+                   " en la habitación con ID: " + str(room_id) +
+                   ". Alcanzó el valor: " + str(current_value),
+        "senderType": "System",
+        "senderId": 0,
+        "receiverId": owner_id,
+        "hotelId": HOTEL_ID
+    }
+
+    print(f"[OperationsAndMonitoringService] Enviando solicitud POST a {back_url} con payload:")
+    print(payload)
+
+    try:
+        response = requests.post(back_url, json=payload, headers=headers)
+
+        print(f"[OperationsAndMonitoringService] Código de respuesta del API: {response.status_code}")
+
+        if response.status_code != 200 and response.status_code != 201:
+            print("[OperationsAndMonitoringService] ❌ Error en la respuesta del API.")
+            return {"access": False}
+
+        back_result = response.json()
+        print(f"[OperationsAndMonitoringService] Respuesta del API: {back_result}")
+
+        access_granted = back_result.get("access", False)
+
+        return {"access": access_granted}
+
+    except Exception as e:
+        print(f"[OperationsAndMonitoringService] 🛑 Excepción durante la solicitud al API: {e}")
+        return {"access": False}

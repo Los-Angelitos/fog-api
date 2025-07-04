@@ -131,6 +131,31 @@ class MonitoringFacade:
             print(f"[MonitoringFacade] Failed to fetch thermostats: {e}")
             return []
 
+    def get_owner_id_by_hotel_id(self, hotel_id: str) -> int:
+        token = self._get_auth_token()
+        if not token:
+            raise Exception("Authentication with backend failed")
+
+        try:
+            url = f"{BACKEND_URL}/hotels/{hotel_id}"
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+            response = requests.get(url, headers=headers)
+
+            if response.status_code != 200:
+                print(f"[MonitoringFacade] Error al obtener owner_id: {response.status_code}")
+                return None
+
+            data = response.json()
+            owner_id = data.get("ownerId")
+            print(f"[MonitoringFacade] Owner ID obtenido: {owner_id}")
+            return owner_id
+        except Exception as e:
+            print(f"[MonitoringFacade] Excepción al obtener owner_id: {e}")
+            return None
+
     def _get_auth_token(self) -> str:
         """Obtiene el token de autenticación para acceder al backend"""
         try:
