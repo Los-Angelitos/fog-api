@@ -1,3 +1,4 @@
+import requests
 from sqlalchemy import select
 from shared.infrastructure.database import db
 
@@ -14,7 +15,11 @@ from operations_and_monitoring.application.external.services import BookingExter
 from typing import Optional
 import datetime
 
+from shared.infrastructure.hotelconfig import BACKEND_URL, HOTEL_ID
+
+
 class MonitoringRepository:
+
 
 
     def get_thermostats(self) -> list[Thermostat]:
@@ -78,27 +83,35 @@ class MonitoringRepository:
             print(f"[Repository] Error retrieving RFID devices: {e}")
             return []
 
-    def save_thermostat(self, item: dict, ):
+    def save_thermostat(self, item: dict):
         session = db.session
         try:
+            print(f"[DEBUG] item recibido: {item}")
+
             # Buscar si ya existe un termostato con ese device_id
             existing = session.query(ThermostatModel).filter_by(device_id=item["id"]).first()
-
             if existing:
                 print(f"[Repository] Thermostat with ID {item['id']} already exists. Skipping.")
                 return
 
-            # Crear uno nuevo si no existe
+            room_id = item.get("roomId")
+            print(f"[DEBUG] room_id obtenido: {room_id}")
+
+            temp_raw = item.get("temperature")
+            print(f"[DEBUG] Temp raw: {temp_raw}, type: {type(temp_raw)}")
+
             new_thermostat = ThermostatModel(
                 device_id=item["id"],
                 api_key=item.get("api_key", ""),
                 ip_address=item.get("ipAddress", ""),
                 mac_address=item.get("macAddress", ""),
-                state=item.get("state", "OFF"),
+                state=0,
                 last_update=item.get("lastUpdate", datetime.datetime.now()),
-                temperature=item.get("temperature", "0"),
-                room_id=item.get("roomId"),
+                temperature = float(temp_raw),
+                room_id=room_id,
             )
+
+            print(f"[DEBUG] new_thermostat a guardar: {new_thermostat}")
 
             session.add(new_thermostat)
             session.commit()

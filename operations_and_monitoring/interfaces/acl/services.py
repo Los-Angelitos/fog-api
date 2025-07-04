@@ -12,6 +12,54 @@ class MonitoringFacade:
     def __init__(self):
         self.repository = MonitoringRepository()
 
+    def get_preferences_by_room_id(self, room_id: str) -> dict:
+        if room_id == None or room_id == "":
+            raise Exception("room_id parameter is necessary")
+
+        #primero hace la solicitud de bookings por room id
+        url = f"{BACKEND_URL}/booking/get-all-bookings"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._get_auth_token()}"
+        }
+        params = {
+            "hotelId": HOTEL_ID
+        }
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code != 200:
+            raise Exception(f"Error fetching bookings: {response.status_code}")
+        bookings = response.json()
+        if not bookings:
+            print(f"[MonitoringFacade] No bookings found for HOTEL_ID={HOTEL_ID}")
+            return {}
+        #los que coincidan con el room_id, agarra el ultimo booking y pide preferences
+        bookings = [booking for booking in bookings if booking.get("roomId") == room_id]
+        booking = bookings[-1] if bookings else None
+        print(f"[MonitoringFacade] Last booking for room_id={room_id}: {booking}")
+        preference_id = booking.get("preferenceId")
+        if not preference_id:
+            print(f"[MonitoringFacade] No guest_id found in booking for room_id={room_id}")
+            return {}
+        #ahora hace la solicitud de preferences por guest_id
+        url = f"{BACKEND_URL}/guest-preferences/{preference_id}"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._get_auth_token()}"  # Asegúrate de que el token sea válido
+        }
+        response = requests.get(url, headers=headers)
+        print(f"[MonitoringFacade] guest-preferences response status: {response.status_code}")
+        print(f"[MonitoringFacade] guest-preferences raw response: {response.text}")
+
+        if response.status_code != 200:
+            raise Exception(f"Error fetching preferences: {response.status_code}")
+        preference = response.json()
+        if not preference:
+            print(f"[MonitoringFacade] No preferences found for preference={preference_id}")
+            return {}
+        return preference.get("temperature")
+
+
+
     def get_devices_by_room_id(self, room_id: str) -> list[Device]:
         if room_id == None or room_id == "":
             raise Exception("room_id parameter is necessary")
@@ -119,8 +167,13 @@ class MonitoringFacade:
                 raise Exception(f"Error fetching thermostats: {response.status_code}")
 
             data = response.json()
-
             for item in data:
+                #print(f"[DEBUG] Procesando item: {item}")
+                #preference_temp = self.get_preferences_by_room_id(item.get("roomId"))
+                #temperature = preference_temp if preference_temp is not None else item.get("temperature", "0")
+                #print(f"[DEBUG] Temperatura seleccionada: {temperature}")
+                #item["temperature"] = temperature
+                #print(f"[DEBUG] Item final antes de guardar: {item}")
                 self.repository.save_thermostat(item)
 
             # Ahora sí los buscas otra vez localmente

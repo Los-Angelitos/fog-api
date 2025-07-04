@@ -5,6 +5,8 @@ class MonitoringService:
     def __init__(self):
         self.monitoring_repository = MonitoringRepository()
 
+
+
     def get_thermostats(self):
         """
         Retrieves devices associated with a specific hotel.
